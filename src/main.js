@@ -40,6 +40,7 @@ const els = {
   fieldEditorPanel: $("fieldEditorPanel"),
   singleLineFieldBtn: $("singleLineFieldBtn"),
   multilineFieldBtn: $("multilineFieldBtn"),
+  circleToggleFieldBtn: $("circleToggleFieldBtn"),
   deleteFieldBtn: $("deleteFieldBtn"),
   clearPageFieldsBtn: $("clearPageFieldsBtn"),
   fieldEditorStatus: $("fieldEditorStatus"),
@@ -158,7 +159,7 @@ function validateManifest(manifest) {
       if (!field.id || typeof field.id !== "string") throw new Error(`page ${page.page} の入力欄に id が必要です。`);
       if (fieldIds.has(field.id)) throw new Error(`page ${page.page} の field id「${field.id}」が重複しています。`);
       fieldIds.add(field.id);
-      if (!["single-line", "multiline"].includes(field.type)) throw new Error(`page ${page.page} の field type が不正です。`);
+      if (!["single-line", "multiline", "circle-toggle"].includes(field.type)) throw new Error(`page ${page.page} の field type が不正です。`);
       for (const key of ["x", "y", "width", "height"]) {
         if (!Number.isFinite(field[key])) throw new Error(`page ${page.page} の field「${field.id}」に ${key} が必要です。`);
       }
@@ -391,28 +392,47 @@ function renderResponseFields() {
       height: `${field.height}%`,
     });
 
-    const control = document.createElement(field.type === "single-line" ? "input" : "textarea");
+    const isCircleToggle = field.type === "circle-toggle";
+    const control = document.createElement(isCircleToggle ? "button" : field.type === "single-line" ? "input" : "textarea");
     if (control instanceof HTMLInputElement) control.type = "text";
+    if (control instanceof HTMLButtonElement) control.type = "button";
     control.className = `response-field ${field.type}`;
-    control.value = answers[field.id] || "";
-    control.placeholder = field.placeholder || "ここに入力";
     control.setAttribute("aria-label", field.label || `ページ${state.currentPage}の回答`);
     control.dataset.fieldId = field.id;
-    if (field.maxLength) control.maxLength = field.maxLength;
-    control.spellcheck = true;
-    control.readOnly = state.fieldEditor;
     control.tabIndex = state.fieldEditor ? -1 : 0;
-    control.style.fontSize = `${Math.max(12, els.pageWrap.clientWidth * (field.fontScale || 0.014))}px`;
-    control.addEventListener("input", () => {
-      answers[field.id] = control.value;
-      persistAnswers();
-    });
+    if (isCircleToggle) {
+      const marked = answers[field.id] === true;
+      control.textContent = "○";
+      control.classList.toggle("marked", marked);
+      control.setAttribute("aria-pressed", String(marked));
+      control.title = "クリックして○印を切り替え";
+      control.style.fontSize = `${Math.max(20, els.pageWrap.clientWidth * (field.fontScale || 0.035))}px`;
+      control.addEventListener("click", () => {
+        if (state.fieldEditor) return;
+        const next = answers[field.id] !== true;
+        answers[field.id] = next;
+        control.classList.toggle("marked", next);
+        control.setAttribute("aria-pressed", String(next));
+        persistAnswers();
+      });
+    } else {
+      control.value = typeof answers[field.id] === "string" ? answers[field.id] : "";
+      control.placeholder = field.placeholder || "ここに入力";
+      if (field.maxLength) control.maxLength = field.maxLength;
+      control.spellcheck = true;
+      control.readOnly = state.fieldEditor;
+      control.style.fontSize = `${Math.max(12, els.pageWrap.clientWidth * (field.fontScale || 0.014))}px`;
+      control.addEventListener("input", () => {
+        answers[field.id] = control.value;
+        persistAnswers();
+      });
+    }
     shell.append(control);
 
     if (state.fieldEditor) {
       const typeLabel = document.createElement("span");
       typeLabel.className = "field-type-label";
-      typeLabel.textContent = field.type === "single-line" ? "1行" : "複数行";
+      typeLabel.textContent = fieldTypeName(field.type, true);
       shell.append(typeLabel);
 
       const resizeHandle = document.createElement("button");
@@ -482,6 +502,18 @@ function nextFieldId() {
   return `${prefix}${String(number).padStart(2, "0")}`;
 }
 
+function fieldTypeName(type, short = false) {
+  if (type === "single-line") return short ? "1行" : "1行・改行なし";
+  if (type === "multiline") return short ? "複数行" : "複数行・改行あり";
+  return short ? "○印" : "○印・あり／なし";
+}
+
+function fieldMinHeight(type) {
+  if (type === "single-line") return 2.5;
+  if (type === "circle-toggle") return 3;
+  return 4;
+}
+
 function setFieldEditor(enabled) {
   if (!state.manifest) return;
   state.fieldEditor = enabled;
@@ -499,13 +531,16 @@ function setFieldType(type) {
   state.fieldType = type;
   const selected = fieldById(state.selectedFieldId);
   if (selected) {
+    const answers = currentPageAnswers();
     selected.type = type;
     if (type === "multiline" && selected.height < 4) selected.height = Math.min(4, 100 - selected.y);
+    if (type === "circle-toggle" && selected.height < 3) selected.height = Math.min(3, 100 - selected.y);
     if (type === "single-line") {
-      const answers = currentPageAnswers();
       if (typeof answers[selected.id] === "string") answers[selected.id] = answers[selected.id].replace(/[\r\n]+/g, " ");
-      persistAnswers();
     }
+    if (type === "circle-toggle") answers[selected.id] = answers[selected.id] === true;
+    else if (typeof answers[selected.id] !== "string") answers[selected.id] = "";
+    persistAnswers();
     state.layoutDirty = true;
     renderResponseFields();
     return;
@@ -519,13 +554,15 @@ function updateFieldEditorUI() {
   if (state.selectedFieldId && !selected) state.selectedFieldId = null;
   els.singleLineFieldBtn.classList.toggle("active", state.fieldType === "single-line");
   els.multilineFieldBtn.classList.toggle("active", state.fieldType === "multiline");
+  els.circleToggleFieldBtn.classList.toggle("active", state.fieldType === "circle-toggle");
   els.singleLineFieldBtn.setAttribute("aria-pressed", String(state.fieldType === "single-line"));
   els.multilineFieldBtn.setAttribute("aria-pressed", String(state.fieldType === "multiline"));
+  els.circleToggleFieldBtn.setAttribute("aria-pressed", String(state.fieldType === "circle-toggle"));
   els.deleteFieldBtn.disabled = !selected;
   els.clearPageFieldsBtn.disabled = fields.length === 0;
   if (!state.fieldEditor) return;
   els.fieldEditorStatus.textContent = selected
-    ? `選択中: ${selected.type === "single-line" ? "1行・改行なし" : "複数行・改行あり"}。ドラッグで移動、右下でサイズ変更。`
+    ? `選択中: ${fieldTypeName(selected.type)}。ドラッグで移動、右下でサイズ変更。`
     : `ページ${state.currentPage}: ${fields.length}個。種類を選び、PDF上をドラッグしてください。`;
 }
 
@@ -577,7 +614,7 @@ function moveFieldInteraction(event) {
     field.x = roundPercent(clamp(interaction.original.x + dx, 0, 100 - field.width));
     field.y = roundPercent(clamp(interaction.original.y + dy, 0, 100 - field.height));
   } else {
-    const minHeight = field.type === "single-line" ? 2.5 : 4;
+    const minHeight = fieldMinHeight(field.type);
     field.width = roundPercent(clamp(interaction.original.width + dx, 3, 100 - field.x));
     field.height = roundPercent(clamp(interaction.original.height + dy, minHeight, 100 - field.y));
   }
@@ -591,7 +628,7 @@ function endFieldInteraction(event) {
   if (interaction.kind === "create") {
     const rect = normalizedFieldRect(interaction.start, pointerPercent(event));
     if (rect.width >= 2 && rect.height >= 1.5) {
-      const minHeight = state.fieldType === "single-line" ? 2.5 : 4;
+      const minHeight = fieldMinHeight(state.fieldType);
       const width = Math.min(100, Math.max(3, rect.width));
       const height = Math.min(100, Math.max(minHeight, rect.height));
       const page = editablePageDefinition();
@@ -605,6 +642,10 @@ function endFieldInteraction(event) {
         height: roundPercent(height),
       };
       page.fields.push(field);
+      if (field.type === "circle-toggle") {
+        currentPageAnswers()[field.id] = false;
+        persistAnswers();
+      }
       state.selectedFieldId = field.id;
       state.layoutDirty = true;
     } else {
@@ -883,6 +924,7 @@ function bindEvents() {
   els.fieldEditorBtn.addEventListener("click", () => setFieldEditor(!state.fieldEditor));
   els.singleLineFieldBtn.addEventListener("click", () => setFieldType("single-line"));
   els.multilineFieldBtn.addEventListener("click", () => setFieldType("multiline"));
+  els.circleToggleFieldBtn.addEventListener("click", () => setFieldType("circle-toggle"));
   els.deleteFieldBtn.addEventListener("click", deleteSelectedField);
   els.clearPageFieldsBtn.addEventListener("click", clearCurrentPageFields);
   els.exportPackageBtn.addEventListener("click", exportEditedPackage);
