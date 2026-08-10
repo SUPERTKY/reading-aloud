@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "id": "kowai-hanashi-25-workbook-v3",
+  "id": "kowai-hanashi-25-workbook-v4-manual-fields",
   "title": "怖い話のつくり方ワーク｜25ページ",
   "pdf": "kowai-hanashi-25page-workbook.pdf",
   "voiceCredit": "VOICEVOX:使用キャラクター名",
@@ -17,9 +17,6 @@
         {"type": "speak", "text": "このページは、4日で完成する進め方です。発想、演出、構成、仕上げの4つに分けます。1日15分でもよく、70点で次へ進み、迷ったら最初の案を使います。下のスタート宣言を書きましょう。"},
         {"type": "wait", "label": "今日のスタート宣言を書いてください。書けたら続けます。"},
         {"type": "speak", "text": "スタート宣言ができました。次は、物語の緊張曲線を作ります。"}
-      ],
-      "fields": [
-        {"id": "p02-start", "type": "single-line", "label": "今日のスタート宣言", "placeholder": "今日の宣言を一行で入力", "x": 9, "y": 78, "width": 82, "height": 4, "maxLength": 80}
       ]
     },
     {
@@ -27,13 +24,6 @@
       "cues": [
         {"type": "speak", "text": "怖さのエンジンは、安心、違和感、反復、接近、余韻の5段階です。読者が安心している場所に小さな説明できなさを置き、それを繰り返し、近づけ、最後に意味を変えます。あなたの物語の5段階を、単語だけでもよいので書きましょう。"},
         {"type": "wait", "label": "安心、違和感、反復、接近、余韻の5段階を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p03-safe", "type": "single-line", "label": "安心", "x": 23, "y": 67.5, "width": 69, "height": 3.2, "maxLength": 50},
-        {"id": "p03-unease", "type": "single-line", "label": "違和感", "x": 23, "y": 72.2, "width": 69, "height": 3.2, "maxLength": 50},
-        {"id": "p03-repeat", "type": "single-line", "label": "反復", "x": 23, "y": 77, "width": 69, "height": 3.2, "maxLength": 50},
-        {"id": "p03-approach", "type": "single-line", "label": "接近", "x": 23, "y": 81.8, "width": 69, "height": 3.2, "maxLength": 50},
-        {"id": "p03-aftertaste", "type": "single-line", "label": "余韻", "x": 23, "y": 86.6, "width": 69, "height": 3.2, "maxLength": 50}
       ]
     },
     {
@@ -41,11 +31,6 @@
       "cues": [
         {"type": "speak", "text": "自分の怖いを選びます。中心にする怖さを、気配、規則、場所、意味の中から一つ選び、もう一つの要素を混ぜてください。その組み合わせで、なぜ続きを考えたいのかも書きます。"},
         {"type": "wait", "label": "中心の怖さ、混ぜる要素、続きを考えたい理由を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p04-center", "type": "single-line", "label": "中心の怖さ", "x": 17, "y": 72.5, "width": 29, "height": 3.3, "maxLength": 20},
-        {"id": "p04-mix", "type": "single-line", "label": "混ぜる要素", "x": 64, "y": 72.5, "width": 28, "height": 3.3, "maxLength": 20},
-        {"id": "p04-reason", "type": "multiline", "label": "なぜ続きを考えたいか", "x": 9, "y": 80.5, "width": 83, "height": 8, "maxLength": 240}
       ]
     },
     {
@@ -53,13 +38,6 @@
       "cues": [
         {"type": "speak", "text": "物語を説明する一文の種を作ります。いつもの場所、おかしな現象、主人公の目的、もっと怖い意味の4つを埋めてください。それから、4つを一文につないで、あなたのログラインを作ります。"},
         {"type": "wait", "label": "4つの材料と、物語を説明する一文を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p05-place", "type": "single-line", "label": "いつもの場所", "x": 34, "y": 35.5, "width": 58, "height": 3.4, "maxLength": 40},
-        {"id": "p05-phenomenon", "type": "single-line", "label": "おかしな現象", "x": 34, "y": 43.5, "width": 58, "height": 3.4, "maxLength": 50},
-        {"id": "p05-purpose", "type": "single-line", "label": "主人公の目的", "x": 34, "y": 51.5, "width": 58, "height": 3.4, "maxLength": 50},
-        {"id": "p05-meaning", "type": "single-line", "label": "もっと怖い意味", "x": 34, "y": 59.5, "width": 58, "height": 3.4, "maxLength": 50},
-        {"id": "p05-logline", "type": "multiline", "label": "あなたのログライン", "x": 10, "y": 71.5, "width": 81, "height": 9, "maxLength": 180}
       ]
     },
     {
@@ -67,14 +45,6 @@
       "cues": [
         {"type": "speak", "text": "舞台は詳しく知っている場所ほど書きやすくなります。まず普通の様子を書き、次に、そのうち一つだけを少し変えてください。日常を1ミリずらす案を3つ作ります。"},
         {"type": "wait", "label": "普通の様子から、少しだけ変わった様子へ。3つの案を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p06-normal-1", "type": "single-line", "label": "普通の様子1", "x": 10, "y": 55.5, "width": 34, "height": 3.4, "maxLength": 40},
-        {"id": "p06-shift-1", "type": "single-line", "label": "少し変えた様子1", "x": 55, "y": 55.5, "width": 37, "height": 3.4, "maxLength": 50},
-        {"id": "p06-normal-2", "type": "single-line", "label": "普通の様子2", "x": 10, "y": 66.5, "width": 34, "height": 3.4, "maxLength": 40},
-        {"id": "p06-shift-2", "type": "single-line", "label": "少し変えた様子2", "x": 55, "y": 66.5, "width": 37, "height": 3.4, "maxLength": 50},
-        {"id": "p06-normal-3", "type": "single-line", "label": "普通の様子3", "x": 10, "y": 77.5, "width": 34, "height": 3.4, "maxLength": 40},
-        {"id": "p06-shift-3", "type": "single-line", "label": "少し変えた様子3", "x": 55, "y": 77.5, "width": 37, "height": 3.4, "maxLength": 50}
       ]
     },
     {
@@ -82,12 +52,6 @@
       "cues": [
         {"type": "speak", "text": "主人公に、その場へ残る理由を与えます。名前、年齢、立場、今日やり遂げたいこと、怖いと感じるもの、それでも進める小さな強みを書いてください。逃げないのではなく、なくしたくないものがあるから残る主人公にします。"},
         {"type": "wait", "label": "主人公の基本情報、目的、怖いもの、強み、小さな望みを書いてください。"}
-      ],
-      "fields": [
-        {"id": "p07-profile", "type": "single-line", "label": "主人公の名前、年齢、立場", "x": 32, "y": 67.5, "width": 60, "height": 3.4, "maxLength": 60},
-        {"id": "p07-goal", "type": "single-line", "label": "今日やり遂げたいこと", "x": 32, "y": 74, "width": 60, "height": 3.4, "maxLength": 70},
-        {"id": "p07-fear", "type": "single-line", "label": "怖いと感じるもの", "x": 32, "y": 80.5, "width": 60, "height": 3.4, "maxLength": 60},
-        {"id": "p07-strength", "type": "single-line", "label": "それでも進める小さな強み", "x": 32, "y": 87, "width": 60, "height": 3.4, "maxLength": 70}
       ]
     },
     {
@@ -95,12 +59,6 @@
       "cues": [
         {"type": "speak", "text": "怪異は全部見せません。音、影、決まった現象、残した跡など、見せるものを3つ考えます。正体の全体や完全な理由など、一番大事なことは最後まで一つ隠してください。"},
         {"type": "wait", "label": "見せるものを3つと、最後まで隠すものを1つ書いてください。"}
-      ],
-      "fields": [
-        {"id": "p08-show-1", "type": "single-line", "label": "見せるもの1", "x": 10, "y": 55.5, "width": 82, "height": 3.3, "maxLength": 60},
-        {"id": "p08-show-2", "type": "single-line", "label": "見せるもの2", "x": 10, "y": 61.5, "width": 82, "height": 3.3, "maxLength": 60},
-        {"id": "p08-show-3", "type": "single-line", "label": "見せるもの3", "x": 10, "y": 67.5, "width": 82, "height": 3.3, "maxLength": 60},
-        {"id": "p08-hide", "type": "single-line", "label": "最後まで隠すもの", "x": 10, "y": 80, "width": 82, "height": 3.5, "maxLength": 80}
       ]
     },
     {
@@ -108,12 +66,6 @@
       "cues": [
         {"type": "speak", "text": "怖さのルールを一つ決めます。いつ、どこで、何をすると、何が変わるのかを一文にしてください。同じルールを3回使い、1回目は偶然、2回目は繰り返し、3回目は主人公へ向くように強くします。"},
         {"type": "wait", "label": "怖さのルールと、3回の変化を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p09-rule", "type": "multiline", "label": "怖さのルール", "x": 9, "y": 33.5, "width": 83, "height": 7, "maxLength": 160},
-        {"id": "p09-first", "type": "single-line", "label": "1回目の変化", "x": 29, "y": 56, "width": 63, "height": 3.5, "maxLength": 70},
-        {"id": "p09-second", "type": "single-line", "label": "2回目の変化", "x": 29, "y": 68, "width": 63, "height": 3.5, "maxLength": 70},
-        {"id": "p09-third", "type": "single-line", "label": "3回目の変化", "x": 29, "y": 80, "width": 63, "height": 3.5, "maxLength": 70}
       ]
     },
     {
@@ -121,11 +73,6 @@
       "cues": [
         {"type": "speak", "text": "手がかりを3段にします。小さな手がかりは見過ごせるもの、中くらいの手がかりは記録や他人の反応など否定しにくいもの、大きな手がかりは主人公だけに向いた意味です。順番に一つずつ考えましょう。"},
         {"type": "wait", "label": "小、中、大の手がかりを一つずつ書いてください。"}
-      ],
-      "fields": [
-        {"id": "p10-small", "type": "single-line", "label": "小さな手がかり", "x": 10, "y": 61.5, "width": 82, "height": 4, "maxLength": 100},
-        {"id": "p10-medium", "type": "single-line", "label": "中くらいの手がかり", "x": 10, "y": 71.5, "width": 82, "height": 4, "maxLength": 100},
-        {"id": "p10-large", "type": "single-line", "label": "大きな手がかり", "x": 10, "y": 81.5, "width": 82, "height": 4, "maxLength": 100}
       ]
     },
     {
@@ -133,14 +80,6 @@
       "cues": [
         {"type": "speak", "text": "五感は全部使わず、1場面につき2つだけ使います。音、光、触感、におい、間から選び、最初の違和感、怪異が近づく場面、最後の一行の前の3場面に、それぞれ2つずつ割り当ててください。"},
         {"type": "wait", "label": "3つの場面それぞれに、使う感覚を2つずつ書いてください。"}
-      ],
-      "fields": [
-        {"id": "p11-first-a", "type": "single-line", "label": "最初の違和感で使う感覚1", "x": 33, "y": 62.5, "width": 22, "height": 3.5, "maxLength": 30},
-        {"id": "p11-first-b", "type": "single-line", "label": "最初の違和感で使う感覚2", "x": 62, "y": 62.5, "width": 30, "height": 3.5, "maxLength": 30},
-        {"id": "p11-near-a", "type": "single-line", "label": "怪異が近づく場面で使う感覚1", "x": 33, "y": 71, "width": 22, "height": 3.5, "maxLength": 30},
-        {"id": "p11-near-b", "type": "single-line", "label": "怪異が近づく場面で使う感覚2", "x": 62, "y": 71, "width": 30, "height": 3.5, "maxLength": 30},
-        {"id": "p11-last-a", "type": "single-line", "label": "最後の一行の前で使う感覚1", "x": 33, "y": 79.5, "width": 22, "height": 3.5, "maxLength": 30},
-        {"id": "p11-last-b", "type": "single-line", "label": "最後の一行の前で使う感覚2", "x": 62, "y": 79.5, "width": 30, "height": 3.5, "maxLength": 30}
       ]
     },
     {
@@ -148,13 +87,6 @@
       "cues": [
         {"type": "speak", "text": "緊張は上げ続けず、上げ下げします。安心から少し上げ、違和感で上げ、小休止で下げ、接近で大きく上げ、余韻で少し下げます。5つの場面に、0から5の緊張度をつけましょう。同じ数字が3回続かないようにします。"},
         {"type": "wait", "label": "5つの場面と、それぞれの緊張度を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p12-scene-1", "type": "single-line", "label": "場面1と緊張度", "placeholder": "場面 ／ 緊張度0〜5", "x": 43, "y": 61.5, "width": 49, "height": 3.2, "maxLength": 80},
-        {"id": "p12-scene-2", "type": "single-line", "label": "場面2と緊張度", "placeholder": "場面 ／ 緊張度0〜5", "x": 43, "y": 66.7, "width": 49, "height": 3.2, "maxLength": 80},
-        {"id": "p12-scene-3", "type": "single-line", "label": "場面3と緊張度", "placeholder": "場面 ／ 緊張度0〜5", "x": 43, "y": 72, "width": 49, "height": 3.2, "maxLength": 80},
-        {"id": "p12-scene-4", "type": "single-line", "label": "場面4と緊張度", "placeholder": "場面 ／ 緊張度0〜5", "x": 43, "y": 77.2, "width": 49, "height": 3.2, "maxLength": 80},
-        {"id": "p12-scene-5", "type": "single-line", "label": "場面5と緊張度", "placeholder": "場面 ／ 緊張度0〜5", "x": 43, "y": 82.4, "width": 49, "height": 3.2, "maxLength": 80}
       ]
     },
     {
@@ -162,10 +94,6 @@
       "cues": [
         {"type": "speak", "text": "読者を次のページへ進ませる、答えを遅らせる質問を置きます。物語の中心に、なぜ、誰が、次は、のような大きな質問を一つ置き、途中に小さな質問を3つ考えてください。"},
         {"type": "wait", "label": "物語の中心の質問を1つと、途中の質問を3つ書いてください。"}
-      ],
-      "fields": [
-        {"id": "p13-center", "type": "multiline", "label": "物語の中心の質問", "x": 9, "y": 71.5, "width": 83, "height": 5.5, "maxLength": 160},
-        {"id": "p13-side", "type": "multiline", "label": "途中の小さな質問3つ", "placeholder": "1.\n2.\n3.", "x": 9, "y": 81.5, "width": 83, "height": 10, "maxLength": 300}
       ]
     },
     {
@@ -173,13 +101,6 @@
       "cues": [
         {"type": "speak", "text": "ページの終わりに扉を置きます。音、発見、反転、期限、呼びかけの5種類です。読者が次を見たくなるように、5つのページ末フックを一つずつ考えましょう。"},
         {"type": "wait", "label": "音、発見、反転、期限、呼びかけのページ末フックを書いてください。"}
-      ],
-      "fields": [
-        {"id": "p14-sound", "type": "single-line", "label": "音のフック", "x": 17, "y": 62.5, "width": 75, "height": 3.2, "maxLength": 80},
-        {"id": "p14-discovery", "type": "single-line", "label": "発見のフック", "x": 17, "y": 68.5, "width": 75, "height": 3.2, "maxLength": 80},
-        {"id": "p14-reversal", "type": "single-line", "label": "反転のフック", "x": 17, "y": 74.5, "width": 75, "height": 3.2, "maxLength": 80},
-        {"id": "p14-deadline", "type": "single-line", "label": "期限のフック", "x": 17, "y": 80.5, "width": 75, "height": 3.2, "maxLength": 80},
-        {"id": "p14-call", "type": "single-line", "label": "呼びかけのフック", "x": 17, "y": 84.8, "width": 75, "height": 3, "maxLength": 80}
       ]
     },
     {
@@ -187,11 +108,6 @@
       "cues": [
         {"type": "speak", "text": "文の長さで心拍を作ります。同じ出来事を、長い文でゆっくり進む形と、短い文で急に進む形の2通りで書いてください。最後に、どちらが場面に合うか選び、理由を書きます。"},
         {"type": "wait", "label": "同じ出来事を2通りの文で書き、合う方と理由を選んでください。"}
-      ],
-      "fields": [
-        {"id": "p15-slow", "type": "multiline", "label": "長い文でゆっくり", "x": 10, "y": 58, "width": 38, "height": 12, "maxLength": 300},
-        {"id": "p15-fast", "type": "multiline", "label": "短い文で急に", "x": 53, "y": 58, "width": 38, "height": 12, "maxLength": 300},
-        {"id": "p15-choice", "type": "single-line", "label": "合う方と理由", "x": 29, "y": 80.5, "width": 62, "height": 4.2, "maxLength": 100}
       ]
     },
     {
@@ -199,10 +115,6 @@
       "cues": [
         {"type": "speak", "text": "会話は、説明しないことで怖くします。質問にまっすぐ答えず、ずれた返事によって見えない出来事を広げます。ページにある2つの質問へ、不自然さが残る返事を書いてください。"},
         {"type": "wait", "label": "2つの質問に対する、説明しすぎない返事を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p16-reply-1", "type": "single-line", "label": "1つ目の質問への返事", "x": 13, "y": 73.5, "width": 79, "height": 4, "maxLength": 120},
-        {"id": "p16-reply-2", "type": "single-line", "label": "2つ目の質問への返事", "x": 13, "y": 82.5, "width": 79, "height": 4, "maxLength": 120}
       ]
     },
     {
@@ -210,11 +122,6 @@
       "cues": [
         {"type": "speak", "text": "ミスリードは公平に作ります。読者が先に信じる表の説明、最後に分かる本当の説明、その両方に使える共通の証拠を書いてください。読み返したときに納得できる形を目指します。"},
         {"type": "wait", "label": "表の説明、本当の説明、両方に使える証拠を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p17-false", "type": "multiline", "label": "表の説明", "x": 10, "y": 69.5, "width": 82, "height": 5, "maxLength": 180},
-        {"id": "p17-true", "type": "multiline", "label": "本当の説明", "x": 10, "y": 79, "width": 82, "height": 5, "maxLength": 180},
-        {"id": "p17-common", "type": "multiline", "label": "両方に使える共通の証拠", "x": 10, "y": 88.5, "width": 82, "height": 5, "maxLength": 180}
       ]
     },
     {
@@ -222,12 +129,6 @@
       "cues": [
         {"type": "speak", "text": "最初の3ページで、場所と目的、最初の違和感、主人公が確かめる行動を置きます。まず3つを一行ずつ決め、そのあと、冒頭3ページを一文でまとめてください。"},
         {"type": "wait", "label": "物語の1ページから3ページまでの役割と、冒頭3ページを表す一文を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p18-page-1", "type": "single-line", "label": "物語1ページ目：場所と目的", "x": 12, "y": 31.5, "width": 79, "height": 3.5, "maxLength": 100},
-        {"id": "p18-page-2", "type": "single-line", "label": "物語2ページ目：最初の違和感", "x": 12, "y": 47.5, "width": 79, "height": 3.5, "maxLength": 100},
-        {"id": "p18-page-3", "type": "single-line", "label": "物語3ページ目：確かめる行動", "x": 12, "y": 59.5, "width": 79, "height": 3.5, "maxLength": 100},
-        {"id": "p18-summary", "type": "multiline", "label": "冒頭3ページを表す一文", "x": 10, "y": 84.5, "width": 82, "height": 6, "maxLength": 200}
       ]
     },
     {
@@ -235,13 +136,6 @@
       "cues": [
         {"type": "speak", "text": "ここから25ページの物語を設計します。物語の1ページから5ページです。舞台と目的、普通の具体物、小さな違和感、主人公が確かめる行動、最初のフックを順番に書いてください。5ページ目の最後には、新しい疑問、発見、期限のどれかを置きます。"},
         {"type": "wait", "label": "物語1ページから5ページまでの内容を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p19-story-01", "type": "single-line", "label": "物語1ページ：舞台と目的", "x": 21.5, "y": 34.2, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p19-story-02", "type": "single-line", "label": "物語2ページ：普通の具体物", "x": 21.5, "y": 44.8, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p19-story-03", "type": "single-line", "label": "物語3ページ：小さな違和感", "x": 21.5, "y": 55.4, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p19-story-04", "type": "single-line", "label": "物語4ページ：確かめる行動", "x": 21.5, "y": 66, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p19-story-05", "type": "single-line", "label": "物語5ページ：最初のフック", "x": 21.5, "y": 76.6, "width": 70.5, "height": 2.5, "maxLength": 100}
       ]
     },
     {
@@ -249,13 +143,6 @@
       "cues": [
         {"type": "speak", "text": "物語の6ページから10ページです。一度安心、二度目の現象、他人または記録、説明が崩れる場面、二つ目のフックを書きます。同じ現象を繰り返し、安心できる説明を少しずつ壊します。"},
         {"type": "wait", "label": "物語6ページから10ページまでの内容を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p20-story-06", "type": "single-line", "label": "物語6ページ：一度安心", "x": 21.5, "y": 34.2, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p20-story-07", "type": "single-line", "label": "物語7ページ：二度目の現象", "x": 21.5, "y": 44.8, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p20-story-08", "type": "single-line", "label": "物語8ページ：他人または記録", "x": 21.5, "y": 55.4, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p20-story-09", "type": "single-line", "label": "物語9ページ：説明が崩れる場面", "x": 21.5, "y": 66, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p20-story-10", "type": "single-line", "label": "物語10ページ：二つ目のフック", "x": 21.5, "y": 76.6, "width": 70.5, "height": 2.5, "maxLength": 100}
       ]
     },
     {
@@ -263,13 +150,6 @@
       "cues": [
         {"type": "speak", "text": "物語の11ページから15ページです。ルールの発見、ルールを試す行動、予想が当たる場面、過去の手がかりの意味が変わる場面、物語中央の反転を書いてください。"},
         {"type": "wait", "label": "物語11ページから15ページまでの内容を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p21-story-11", "type": "single-line", "label": "物語11ページ：ルールの発見", "x": 21.5, "y": 34.2, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p21-story-12", "type": "single-line", "label": "物語12ページ：ルールを試す", "x": 21.5, "y": 44.8, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p21-story-13", "type": "single-line", "label": "物語13ページ：予想が当たる", "x": 21.5, "y": 55.4, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p21-story-14", "type": "single-line", "label": "物語14ページ：意味が変わる", "x": 21.5, "y": 66, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p21-story-15", "type": "single-line", "label": "物語15ページ：中央の反転", "x": 21.5, "y": 76.6, "width": 70.5, "height": 2.5, "maxLength": 100}
       ]
     },
     {
@@ -277,13 +157,6 @@
       "cues": [
         {"type": "speak", "text": "物語の16ページから20ページです。短い安心、隠れていた証拠、真相の一部、主人公の選択、最大のフックを書いてください。主人公の行動を、真相へ近づけます。"},
         {"type": "wait", "label": "物語16ページから20ページまでの内容を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p22-story-16", "type": "single-line", "label": "物語16ページ：短い安心", "x": 21.5, "y": 34.2, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p22-story-17", "type": "single-line", "label": "物語17ページ：隠れていた証拠", "x": 21.5, "y": 44.8, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p22-story-18", "type": "single-line", "label": "物語18ページ：真相の一部", "x": 21.5, "y": 55.4, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p22-story-19", "type": "single-line", "label": "物語19ページ：主人公の選択", "x": 21.5, "y": 66, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p22-story-20", "type": "single-line", "label": "物語20ページ：最大のフック", "x": 21.5, "y": 76.6, "width": 70.5, "height": 2.5, "maxLength": 100}
       ]
     },
     {
@@ -291,13 +164,6 @@
       "cues": [
         {"type": "speak", "text": "物語の21ページから25ページです。決めた行動、ルールの応用、中心の問いへの答え、日常へ戻る場面、最後の一行を書いてください。説明しすぎず、主人公の選択と余韻を残します。"},
         {"type": "wait", "label": "物語21ページから25ページまでの内容を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p23-story-21", "type": "single-line", "label": "物語21ページ：決めた行動", "x": 21.5, "y": 34.2, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p23-story-22", "type": "single-line", "label": "物語22ページ：ルールの応用", "x": 21.5, "y": 44.8, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p23-story-23", "type": "single-line", "label": "物語23ページ：中心の問いへの答え", "x": 21.5, "y": 55.4, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p23-story-24", "type": "single-line", "label": "物語24ページ：日常へ戻る", "x": 21.5, "y": 66, "width": 70.5, "height": 2.5, "maxLength": 100},
-        {"id": "p23-story-25", "type": "single-line", "label": "物語25ページ：最後の一行", "x": 21.5, "y": 76.6, "width": 70.5, "height": 2.5, "maxLength": 100}
       ]
     },
     {
@@ -305,11 +171,6 @@
       "cues": [
         {"type": "speak", "text": "結末は、答えと余韻を組み合わせます。安心だと思った意味が変わる反転、最初の場面へ戻る循環、日常へ戻っても一つ残る持ち帰りから、結末の型を選んでください。中心の質問への答えを説明せずに一文で書き、最後の一行を15文字から35文字を目安に作ります。"},
         {"type": "wait", "label": "結末の型、中心の質問への答え、最後の一行を書いてください。"}
-      ],
-      "fields": [
-        {"id": "p24-type", "type": "single-line", "label": "結末の型", "x": 17, "y": 72, "width": 75, "height": 4, "maxLength": 40},
-        {"id": "p24-answer", "type": "multiline", "label": "中心の質問への答え", "x": 10, "y": 79.5, "width": 82, "height": 6, "maxLength": 180},
-        {"id": "p24-last-line", "type": "single-line", "label": "最後の一行", "placeholder": "15〜35文字を目安に入力", "x": 10, "y": 86.8, "width": 82, "height": 4, "maxLength": 35}
       ]
     },
     {
@@ -318,16 +179,6 @@
         {"type": "speak", "text": "完成判定です。違和感、ルール、ページめくり、読みやすさ、余韻を、それぞれ0点から2点で確認してください。点数が低い項目から、直す場所を一つだけ決めます。最後に作品タイトルと日付を書き、完成宣言をします。"},
         {"type": "wait", "label": "5項目を採点し、直す場所、作品タイトル、日付、完成宣言を書いてください。"},
         {"type": "speak", "text": "25ページの設計が完成しました。回答を保存し、必要なら物語の本文を書き始めてください。おつかれさまでした。"}
-      ],
-      "fields": [
-        {"id": "p25-score-unease", "type": "single-line", "label": "違和感の点数", "placeholder": "0〜2", "x": 84.5, "y": 24.5, "width": 7.5, "height": 3, "maxLength": 1},
-        {"id": "p25-score-rule", "type": "single-line", "label": "ルールの点数", "placeholder": "0〜2", "x": 84.5, "y": 31.8, "width": 7.5, "height": 3, "maxLength": 1},
-        {"id": "p25-score-hook", "type": "single-line", "label": "ページめくりの点数", "placeholder": "0〜2", "x": 84.5, "y": 39, "width": 7.5, "height": 3, "maxLength": 1},
-        {"id": "p25-score-read", "type": "single-line", "label": "読みやすさの点数", "placeholder": "0〜2", "x": 84.5, "y": 46.3, "width": 7.5, "height": 3, "maxLength": 1},
-        {"id": "p25-score-aftertaste", "type": "single-line", "label": "余韻の点数", "placeholder": "0〜2", "x": 84.5, "y": 53.6, "width": 7.5, "height": 3, "maxLength": 1},
-        {"id": "p25-fix", "type": "single-line", "label": "直す場所", "x": 31, "y": 73, "width": 61, "height": 4, "maxLength": 100},
-        {"id": "p25-title", "type": "single-line", "label": "作品タイトル", "x": 24, "y": 84.2, "width": 66, "height": 3.5, "maxLength": 80},
-        {"id": "p25-date", "type": "single-line", "label": "完成日", "x": 57, "y": 87.3, "width": 35, "height": 2.6, "maxLength": 20}
       ]
     }
   ]
