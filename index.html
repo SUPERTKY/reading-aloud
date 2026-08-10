@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#17182d" />
-    <meta name="description" content="PDFワークを音声と手書き待機付きで進めるブラウザプレイヤー" />
+    <meta name="description" content="PDFワークへ手動で入力欄を配置し、音声と記入待機付きで進めるブラウザプレイヤー" />
     <title>音声つきPDFワークプレイヤー</title>
   </head>
   <body>
@@ -46,10 +46,28 @@
             <span id="totalPagesTop">1</span>
           </div>
           <div class="top-actions">
+            <button id="fieldEditorBtn" class="tool-btn" type="button" aria-pressed="false">▣ 入力欄を配置</button>
+            <button id="exportPackageBtn" class="tool-btn" type="button">⇩ ZIPを保存</button>
             <button id="exportAnswersBtn" class="tool-btn" type="button">回答を保存</button>
             <button id="fullscreenBtn" class="icon-btn" type="button" title="全画面" aria-label="全画面">⛶</button>
           </div>
         </header>
+
+        <section id="fieldEditorPanel" class="field-editor-panel" aria-label="入力欄の配置設定" hidden>
+          <div class="field-editor-heading">
+            <strong>入力欄を手動配置</strong>
+            <span>PDF上をドラッグして大きさを決めます</span>
+          </div>
+          <div class="field-type-controls" aria-label="入力欄の種類">
+            <button id="singleLineFieldBtn" class="editor-choice active" type="button" aria-pressed="true">1行・改行なし</button>
+            <button id="multilineFieldBtn" class="editor-choice" type="button" aria-pressed="false">複数行・改行あり</button>
+          </div>
+          <div class="field-editor-actions">
+            <button id="deleteFieldBtn" type="button" disabled>選択した欄を削除</button>
+            <button id="clearPageFieldsBtn" type="button" disabled>このページの欄を全削除</button>
+          </div>
+          <p id="fieldEditorStatus">欄の種類を選び、PDF上をドラッグしてください。</p>
+        </section>
 
         <section class="workspace">
           <button id="prevPageBtn" class="page-arrow page-arrow-left" type="button" aria-label="前のページ">‹</button>
