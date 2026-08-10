@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17182d" />
+    <meta name="description" content="PDFワークを音声と手書き待機付きで進めるブラウザプレイヤー" />
+    <title>音声つきPDFワークプレイヤー</title>
+  </head>
+  <body>
+    <div id="app">
+      <section id="dropScreen" class="drop-screen" aria-labelledby="appTitle">
+        <div class="brand-mark" aria-hidden="true"><span></span></div>
+        <p class="eyebrow">VOICE WORKBOOK PLAYER</p>
+        <h1 id="appTitle">音声つきPDFワーク</h1>
+        <p class="lead">PDFと <code>script.json</code> を入れたZIPを読み込みます。<br />ファイルはこのブラウザ内だけで処理されます。</p>
+        <label id="dropZone" class="drop-zone" for="zipInput">
+          <input id="zipInput" type="file" accept=".zip,application/zip" />
+          <span class="drop-icon" aria-hidden="true">＋</span>
+          <strong>ZIPを選ぶ</strong>
+          <small>または、ここへドラッグ＆ドロップ</small>
+        </label>
+        <p id="loadError" class="error" role="alert" hidden></p>
+        <details class="format-help">
+          <summary>ZIPに必要なもの</summary>
+          <pre>workbook.zip
+├─ workbook.pdf
+├─ script.json
+└─ audio/          # VOICEVOX音声（任意）</pre>
+        </details>
+      </section>
+
+      <main id="player" class="player" hidden>
+        <header class="topbar">
+          <div class="work-title-wrap">
+            <button id="changeZipBtn" class="icon-btn" type="button" title="別のZIPを開く" aria-label="別のZIPを開く">↩</button>
+            <div>
+              <p class="eyebrow">WORKBOOK</p>
+              <h1 id="workTitle">読み込み中</h1>
+            </div>
+          </div>
+          <div class="page-status" aria-live="polite">
+            <span>PAGE</span>
+            <strong id="currentPageTop">1</strong>
+            <span>/</span>
+            <span id="totalPagesTop">1</span>
+          </div>
+          <div class="top-actions">
+            <button id="writeModeBtn" class="tool-btn" type="button" aria-pressed="false">✎ 書き込む</button>
+            <button id="exportAnswersBtn" class="tool-btn" type="button">回答を保存</button>
+            <button id="fullscreenBtn" class="icon-btn" type="button" title="全画面" aria-label="全画面">⛶</button>
+          </div>
+        </header>
+
+        <section class="workspace">
+          <button id="prevPageBtn" class="page-arrow page-arrow-left" type="button" aria-label="前のページ">‹</button>
+          <div id="pdfStage" class="pdf-stage" aria-label="PDF表示領域">
+            <div id="pageWrap" class="page-wrap">
+              <canvas id="pdfCanvas" aria-label="現在のPDFページ"></canvas>
+              <div id="annotationLayer" class="annotation-layer" aria-label="回答入力レイヤー"></div>
+              <div id="renderSpinner" class="spinner" role="status">ページを描画中…</div>
+            </div>
+          </div>
+          <button id="nextPageBtn" class="page-arrow page-arrow-right" type="button" aria-label="次のページ">›</button>
+        </section>
+
+        <section class="control-deck" aria-label="読み上げ操作">
+          <div class="page-controls">
+            <button id="prevPageBottomBtn" type="button">← 前へ</button>
+            <label>ページ <input id="pageInput" type="number" min="1" value="1" inputmode="numeric" /> / <span id="totalPagesBottom">1</span></label>
+            <button id="nextPageBottomBtn" type="button">次へ →</button>
+            <span class="divider" aria-hidden="true"></span>
+            <button id="fitPageBtn" class="compact active" type="button">全体</button>
+            <button id="fitWidthBtn" class="compact" type="button">幅</button>
+            <button id="zoomOutBtn" class="compact" type="button" aria-label="縮小">−</button>
+            <span id="zoomLabel" class="zoom-label">100%</span>
+            <button id="zoomInBtn" class="compact" type="button" aria-label="拡大">＋</button>
+          </div>
+
+          <div class="audio-controls">
+            <button id="playPauseBtn" class="primary-control" type="button">▶ 読み上げる</button>
+            <button id="stopBtn" class="stop-control" type="button">■ 停止</button>
+            <div class="narration-info">
+              <span id="narrationState" class="state-pill">停止中</span>
+              <p id="narrationCaption">このページの読み上げを開始できます。</p>
+            </div>
+            <button id="continueBtn" class="continue-control" type="button" hidden>書き終わったら続ける →</button>
+          </div>
+          <div class="credit-row">
+            <span id="privacyNote">ZIPの内容は外部へ送信されません</span>
+            <span id="voiceCredit"></span>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

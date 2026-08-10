@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Voice Workbook Script",
+  "type": "object",
+  "required": ["version", "title", "pdf", "pages"],
+  "properties": {
+    "version": {"const": 1},
+    "id": {"type": "string"},
+    "title": {"type": "string", "minLength": 1},
+    "pdf": {"type": "string", "minLength": 1},
+    "voiceCredit": {"type": "string"},
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["page", "cues"],
+        "properties": {
+          "page": {"type": "integer", "minimum": 1},
+          "cues": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["type", "text"],
+                  "properties": {
+                    "type": {"const": "speak"},
+                    "text": {"type": "string", "minLength": 1},
+                    "audio": {"type": "string"},
+                    "caption": {"type": "string"},
+                    "lang": {"type": "string"},
+                    "rate": {"type": "number"},
+                    "pitch": {"type": "number"}
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": ["type"],
+                  "properties": {
+                    "type": {"const": "wait"},
+                    "label": {"type": "string"}
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+
