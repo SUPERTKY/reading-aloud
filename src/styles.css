@@ -112,6 +112,10 @@ button:disabled { cursor: not-allowed; opacity: .35; }
 .response-field:hover { border-color:rgba(117,100,223,.95); background:rgba(255,255,255,.92); }
 .response-field:focus { border-style:solid; border-color:#7564df; background:rgba(255,255,255,.97); box-shadow:0 0 0 2px rgba(117,100,223,.2); }
 .response-field.multiline { resize:none; }
+.response-field.circle-toggle { display:grid; place-items:center; padding:0; color:transparent; font-weight:700; line-height:1; cursor:pointer; }
+.response-field.circle-toggle.marked { color:#6757c7; background:rgba(255,255,255,.93); }
+.response-field.circle-toggle:not(.marked):hover { color:rgba(103,87,199,.32); }
+.response-field.circle-toggle:focus-visible { color:rgba(103,87,199,.42); }
 .editor-active .response-field-shell { pointer-events:auto; cursor:move; outline:2px solid rgba(105,201,193,.75); outline-offset:1px; }
 .editor-active .response-field-shell.selected { z-index:3; outline-color:var(--amber); box-shadow:0 0 0 4px rgba(243,185,95,.22); }
 .editor-active .response-field { pointer-events:none; user-select:none; border-style:solid; border-color:rgba(35,38,65,.45); background:rgba(255,255,255,.74); }
@@ -120,6 +124,7 @@ button:disabled { cursor: not-allowed; opacity: .35; }
 .field-resize-handle { position:absolute; right:-7px; bottom:-7px; width:24px; height:24px; display:grid; place-content:center; padding:0; border:2px solid #17182d; border-radius:50%; color:#17182d; background:var(--amber); cursor:nwse-resize; font-size:13px; touch-action:none; }
 .field-create-preview { position:absolute; pointer-events:none; border:2px dashed var(--teal); border-radius:6px; background:rgba(105,201,193,.24); }
 .field-create-preview.multiline { border-color:var(--violet); background:rgba(117,100,223,.22); }
+.field-create-preview.circle-toggle { border-color:var(--amber); background:rgba(243,185,95,.24); }
 
 .control-deck { z-index:20; background:#17182d; border-top:1px solid #34364f; padding:9px 18px 7px; display:grid; grid-template-rows:38px 54px 18px; gap:6px; }
 .page-controls, .audio-controls { display:flex; align-items:center; gap:8px; }
