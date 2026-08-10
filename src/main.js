@@ -36,6 +36,14 @@ const els = {
   zoomOutBtn: $("zoomOutBtn"),
   zoomInBtn: $("zoomInBtn"),
   zoomLabel: $("zoomLabel"),
+  compositionBtn: $("compositionBtn"),
+  compositionPanel: $("compositionPanel"),
+  compositionPrompt: $("compositionPrompt"),
+  compositionTitleInput: $("compositionTitleInput"),
+  compositionTextInput: $("compositionTextInput"),
+  compositionCharacterCount: $("compositionCharacterCount"),
+  saveCompositionTextBtn: $("saveCompositionTextBtn"),
+  closeCompositionBtn: $("closeCompositionBtn"),
   fieldEditorBtn: $("fieldEditorBtn"),
   fieldEditorPanel: $("fieldEditorPanel"),
   singleLineFieldBtn: $("singleLineFieldBtn"),
@@ -79,6 +87,7 @@ const state = {
   selectedFieldId: null,
   fieldInteraction: null,
   layoutDirty: false,
+  compositionOpen: false,
 };
 
 function makeToast() {
@@ -153,6 +162,19 @@ function validateManifest(manifest) {
     if (page.fields !== undefined && !Array.isArray(page.fields)) {
       throw new Error(`page ${page.page} の fields は配列にしてください。`);
     }
+    if (page.composition !== undefined) {
+      if (!page.composition || typeof page.composition !== "object" || Array.isArray(page.composition)) {
+        throw new Error(`page ${page.page} の composition はオブジェクトにしてください。`);
+      }
+      for (const key of ["prompt", "titlePlaceholder", "bodyPlaceholder", "filename"]) {
+        if (page.composition[key] !== undefined && typeof page.composition[key] !== "string") {
+          throw new Error(`page ${page.page} の composition.${key} は文字列にしてください。`);
+        }
+      }
+      if (page.composition.maxLength !== undefined && (!Number.isInteger(page.composition.maxLength) || page.composition.maxLength < 1)) {
+        throw new Error(`page ${page.page} の composition.maxLength が不正です。`);
+      }
+    }
     const fieldIds = new Set();
     for (const field of page.fields || []) {
       if (!field.id || typeof field.id !== "string") throw new Error(`page ${page.page} の入力欄に id が必要です。`);
@@ -205,6 +227,7 @@ async function loadPackage(file) {
     state.fieldEditor = false;
     state.selectedFieldId = null;
     state.fieldInteraction = null;
+    state.compositionOpen = false;
     const pdfData = await zipEntry(manifest.pdf).async("uint8array");
     state.pdf = await getDocument({ data: pdfData }).promise;
     const outOfRange = manifest.pages.find((page) => page.page > state.pdf.numPages);
@@ -254,9 +277,13 @@ function unloadCurrentPackage() {
   state.selectedFieldId = null;
   state.fieldInteraction = null;
   state.layoutDirty = false;
+  state.compositionOpen = false;
   els.fieldEditorPanel.hidden = true;
   els.fieldEditorBtn.setAttribute("aria-pressed", "false");
   els.fieldEditorBtn.textContent = "▣ 入力欄を配置";
+  els.compositionPanel.hidden = true;
+  els.compositionBtn.hidden = true;
+  els.compositionBtn.setAttribute("aria-pressed", "false");
 }
 
 function loadAnswers() {
@@ -266,7 +293,7 @@ function loadAnswers() {
   } catch (error) {
     console.warn("Saved answers could not be read", error);
   }
-  return { version: 2, workbookId: state.manifest.id || state.manifest.title, title: state.manifest.title, pages: {} };
+  return { version: 2, workbookId: state.manifest.id || state.manifest.title, title: state.manifest.title, pages: {}, compositions: {} };
 }
 
 function persistAnswers() {
@@ -281,6 +308,17 @@ function currentPageAnswers() {
   const key = String(state.currentPage);
   if (!state.answers.pages[key] || Array.isArray(state.answers.pages[key])) state.answers.pages[key] = {};
   return state.answers.pages[key];
+}
+
+function currentComposition() {
+  if (!state.answers.compositions || typeof state.answers.compositions !== "object" || Array.isArray(state.answers.compositions)) {
+    state.answers.compositions = {};
+  }
+  const key = String(state.currentPage);
+  if (!state.answers.compositions[key] || typeof state.answers.compositions[key] !== "object") {
+    state.answers.compositions[key] = { title: "", text: "" };
+  }
+  return state.answers.compositions[key];
 }
 
 async function renderCurrentPage() {
@@ -345,12 +383,14 @@ function updatePageUI() {
   els.narrationCaption.textContent = cues.length ? `このページには ${cues.length} 個の読み上げ・待機指示があります。` : "このページには読み上げ指示がありません。";
   updatePlaybackUI();
   updateFieldEditorUI();
+  updateCompositionAvailability();
 }
 
 async function goToPage(pageNumber) {
   if (!state.pdf) return;
   const next = Math.max(1, Math.min(state.pdf.numPages, Number(pageNumber) || 1));
   if (next === state.currentPage) return;
+  if (state.compositionOpen) closeComposition();
   stopNarration(true);
   state.selectedFieldId = null;
   state.fieldInteraction = null;
@@ -484,6 +524,7 @@ function nextFieldId() {
 
 function setFieldEditor(enabled) {
   if (!state.manifest) return;
+  if (enabled && state.compositionOpen) closeComposition();
   state.fieldEditor = enabled;
   state.selectedFieldId = null;
   state.fieldInteraction = null;
@@ -666,6 +707,68 @@ async function exportEditedPackage() {
     els.exportPackageBtn.disabled = false;
     els.exportPackageBtn.textContent = "⇩ ZIPを保存";
   }
+}
+
+function updateCompositionAvailability() {
+  const available = Boolean(state.manifest && pageDefinition().composition);
+  els.compositionBtn.hidden = !available;
+  if (!available && state.compositionOpen) closeComposition();
+}
+
+function updateCompositionCharacterCount() {
+  els.compositionCharacterCount.textContent = `${Array.from(els.compositionTextInput.value).length}文字`;
+}
+
+function openComposition() {
+  const config = pageDefinition().composition;
+  if (!config) return;
+  if (state.fieldEditor) setFieldEditor(false);
+  stopNarration(true);
+  const composition = currentComposition();
+  els.compositionPrompt.textContent = config.prompt || "これまでの設計を使って、物語の本文を書きましょう。";
+  els.compositionTitleInput.placeholder = config.titlePlaceholder || "作品タイトルを入力";
+  els.compositionTextInput.placeholder = config.bodyPlaceholder || "ここに物語を書きます。改行も使えます。";
+  els.compositionTextInput.maxLength = config.maxLength || 50000;
+  els.compositionTitleInput.value = composition.title || "";
+  els.compositionTextInput.value = composition.text || "";
+  state.compositionOpen = true;
+  els.compositionPanel.hidden = false;
+  els.compositionBtn.setAttribute("aria-pressed", "true");
+  updateCompositionCharacterCount();
+  requestAnimationFrame(() => els.compositionTextInput.focus());
+}
+
+function closeComposition() {
+  if (!state.compositionOpen) return;
+  persistAnswers();
+  state.compositionOpen = false;
+  els.compositionPanel.hidden = true;
+  els.compositionBtn.setAttribute("aria-pressed", "false");
+}
+
+function saveCompositionInput() {
+  const composition = currentComposition();
+  composition.title = els.compositionTitleInput.value;
+  composition.text = els.compositionTextInput.value;
+  composition.updatedAt = new Date().toISOString();
+  persistAnswers();
+  updateCompositionCharacterCount();
+}
+
+function exportCompositionText() {
+  const composition = currentComposition();
+  composition.title = els.compositionTitleInput.value;
+  composition.text = els.compositionTextInput.value;
+  composition.updatedAt = new Date().toISOString();
+  persistAnswers();
+  const config = pageDefinition().composition || {};
+  const content = composition.title.trim()
+    ? `${composition.title.trim()}\n\n${composition.text}`
+    : composition.text;
+  const requestedName = config.filename || composition.title || `${state.manifest.title}-作文`;
+  const baseName = safeFilename(String(requestedName).replace(/\.txt$/i, ""));
+  downloadBlob(new Blob(["\uFEFF", content], { type: "text/plain;charset=utf-8" }), `${baseName}.txt`);
+  notify("作文をTXTで保存しました。", "info");
 }
 
 function exportAnswers() {
@@ -880,6 +983,11 @@ function bindEvents() {
   els.fitWidthBtn.addEventListener("click", () => setFitMode("width"));
   els.zoomOutBtn.addEventListener("click", () => changeZoom(-0.1));
   els.zoomInBtn.addEventListener("click", () => changeZoom(0.1));
+  els.compositionBtn.addEventListener("click", () => state.compositionOpen ? closeComposition() : openComposition());
+  els.closeCompositionBtn.addEventListener("click", closeComposition);
+  els.saveCompositionTextBtn.addEventListener("click", exportCompositionText);
+  els.compositionTitleInput.addEventListener("input", saveCompositionInput);
+  els.compositionTextInput.addEventListener("input", saveCompositionInput);
   els.fieldEditorBtn.addEventListener("click", () => setFieldEditor(!state.fieldEditor));
   els.singleLineFieldBtn.addEventListener("click", () => setFieldType("single-line"));
   els.multilineFieldBtn.addEventListener("click", () => setFieldType("multiline"));
@@ -911,6 +1019,11 @@ function bindEvents() {
     }
   });
   document.addEventListener("keydown", (event) => {
+    if (state.compositionOpen && event.key === "Escape") {
+      event.preventDefault();
+      closeComposition();
+      return;
+    }
     const tag = event.target?.tagName?.toLowerCase();
     if (["input", "textarea", "button"].includes(tag)) return;
     if (state.fieldEditor) {
