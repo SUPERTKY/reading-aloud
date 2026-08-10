@@ -96,6 +96,23 @@ button:disabled { cursor: not-allowed; opacity: .35; }
 .field-editor-actions button:last-child { color:#ffd9df; border-color:#734556; }
 .field-editor-panel p { margin:10px 2px 0; line-height:1.5; }
 
+.composition-panel { position:absolute; z-index:45; top:70px; right:56px; bottom:142px; left:56px; display:flex; flex-direction:column; min-height:0; padding:18px 22px 22px; background:linear-gradient(145deg,#20223a,#111220); }
+.composition-header { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:12px; }
+.composition-header h2 { margin:2px 0 0; font-size:22px; }
+.composition-actions { display:flex; gap:8px; }
+.composition-actions button { min-height:38px; padding:7px 13px; border:1px solid #555873; border-radius:9px; color:#e9e7f0; background:#292b48; }
+.composition-actions button:first-child { color:#15162a; background:var(--teal); border-color:var(--teal); font-weight:700; }
+.composition-paper { width:min(980px,100%); min-height:0; flex:1; align-self:center; display:flex; flex-direction:column; padding:24px clamp(18px,4vw,54px) 16px; border-radius:10px; color:var(--ink); background:#fbfaf5; box-shadow:0 16px 42px rgba(0,0,0,.38); }
+.composition-prompt { min-height:1.5em; margin:0 0 12px; color:#625c7b; font-size:14px; line-height:1.6; }
+.composition-title-label { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:14px; color:#625c7b; font-size:13px; font-weight:700; }
+.composition-title-label input { min-width:0; padding:9px 12px; border:0; border-bottom:2px solid #d7d2c8; outline:0; color:var(--ink); background:transparent; font-size:18px; }
+.composition-title-label input:focus { border-bottom-color:var(--violet); }
+.composition-body-label { margin:16px 0 7px; color:#625c7b; font-size:13px; font-weight:700; }
+#compositionTextInput { min-height:240px; flex:1; resize:none; padding:18px 20px; border:1px solid #d9d4ca; border-radius:8px; outline:0; color:#242538; background:repeating-linear-gradient(#fff 0,#fff 31px,#e9e5dd 32px); font-size:17px; line-height:32px; }
+#compositionTextInput:focus { border-color:var(--violet); box-shadow:0 0 0 3px rgba(117,100,223,.13); }
+.composition-footer { display:flex; justify-content:space-between; gap:16px; margin-top:10px; color:#777184; font-size:12px; }
+.composition-footer strong { color:#4e466e; }
+
 .workspace { position:relative; min-height:0; display:grid; grid-template-columns:56px minmax(0,1fr) 56px; background: radial-gradient(circle at 50% 40%, #2b2d48 0, #151627 62%, #0c0d18 100%); }
 .pdf-stage { min-width:0; min-height:0; display:flex; align-items:center; justify-content:center; overflow:auto; padding:18px; }
 .pdf-stage.fit-width { align-items:flex-start; }
@@ -149,6 +166,13 @@ button:disabled { cursor: not-allowed; opacity: .35; }
   .top-actions .tool-btn { font-size:0; min-width:40px; }
   .top-actions .tool-btn::first-letter { font-size:18px; }
   .field-editor-panel { top:72px; right:46px; width:calc(100vw - 92px); }
+  .composition-panel { top:64px; right:38px; bottom:184px; left:38px; padding:12px; }
+  .composition-header { align-items:flex-start; }
+  .composition-header h2 { font-size:18px; }
+  .composition-actions button { min-height:34px; padding:5px 8px; font-size:12px; }
+  .composition-paper { padding:16px 14px 12px; }
+  .composition-title-label { grid-template-columns:1fr; gap:4px; }
+  #compositionTextInput { min-height:180px; padding:12px 14px; font-size:16px; }
   .workspace { grid-template-columns:38px minmax(0,1fr) 38px; }
   .pdf-stage { padding:9px; }
   .page-arrow { font-size:38px; }
