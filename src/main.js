@@ -36,6 +36,14 @@ const els = {
   zoomOutBtn: $("zoomOutBtn"),
   zoomInBtn: $("zoomInBtn"),
   zoomLabel: $("zoomLabel"),
+  fieldEditorBtn: $("fieldEditorBtn"),
+  fieldEditorPanel: $("fieldEditorPanel"),
+  singleLineFieldBtn: $("singleLineFieldBtn"),
+  multilineFieldBtn: $("multilineFieldBtn"),
+  deleteFieldBtn: $("deleteFieldBtn"),
+  clearPageFieldsBtn: $("clearPageFieldsBtn"),
+  fieldEditorStatus: $("fieldEditorStatus"),
+  exportPackageBtn: $("exportPackageBtn"),
   exportAnswersBtn: $("exportAnswersBtn"),
   fullscreenBtn: $("fullscreenBtn"),
   playPauseBtn: $("playPauseBtn"),
@@ -49,6 +57,7 @@ const els = {
 const state = {
   zip: null,
   zipPrefix: "",
+  originalZipName: "workbook.zip",
   manifest: null,
   pdf: null,
   currentPage: 1,
@@ -65,6 +74,11 @@ const state = {
   cueIndex: 0,
   playbackMode: "idle", // idle | playing | paused | waiting | done
   playbackToken: 0,
+  fieldEditor: false,
+  fieldType: "single-line",
+  selectedFieldId: null,
+  fieldInteraction: null,
+  layoutDirty: false,
 };
 
 function makeToast() {
@@ -103,6 +117,17 @@ function zipEntry(path) {
 
 function pageDefinition(pageNumber = state.currentPage) {
   return state.manifest?.pages?.find((page) => Number(page.page) === pageNumber) ?? { page: pageNumber, cues: [], fields: [] };
+}
+
+function editablePageDefinition(pageNumber = state.currentPage) {
+  let page = state.manifest.pages.find((item) => Number(item.page) === pageNumber);
+  if (!page) {
+    page = { page: pageNumber, cues: [], fields: [] };
+    state.manifest.pages.push(page);
+    state.manifest.pages.sort((a, b) => a.page - b.page);
+  }
+  if (!Array.isArray(page.fields)) page.fields = [];
+  return page;
 }
 
 function validateManifest(manifest) {
@@ -174,7 +199,12 @@ async function loadPackage(file) {
     unloadCurrentPackage();
     state.zip = zip;
     state.zipPrefix = prefix;
+    state.originalZipName = file.name || "workbook.zip";
     state.manifest = manifest;
+    state.layoutDirty = false;
+    state.fieldEditor = false;
+    state.selectedFieldId = null;
+    state.fieldInteraction = null;
     const pdfData = await zipEntry(manifest.pdf).async("uint8array");
     state.pdf = await getDocument({ data: pdfData }).promise;
     const outOfRange = manifest.pages.find((page) => page.page > state.pdf.numPages);
@@ -220,6 +250,13 @@ function unloadCurrentPackage() {
   state.zip = null;
   state.manifest = null;
   state.pdf = null;
+  state.fieldEditor = false;
+  state.selectedFieldId = null;
+  state.fieldInteraction = null;
+  state.layoutDirty = false;
+  els.fieldEditorPanel.hidden = true;
+  els.fieldEditorBtn.setAttribute("aria-pressed", "false");
+  els.fieldEditorBtn.textContent = "▣ 入力欄を配置";
 }
 
 function loadAnswers() {
@@ -307,6 +344,7 @@ function updatePageUI() {
   const cues = pageDefinition().cues;
   els.narrationCaption.textContent = cues.length ? `このページには ${cues.length} 個の読み上げ・待機指示があります。` : "このページには読み上げ指示がありません。";
   updatePlaybackUI();
+  updateFieldEditorUI();
 }
 
 async function goToPage(pageNumber) {
@@ -314,6 +352,8 @@ async function goToPage(pageNumber) {
   const next = Math.max(1, Math.min(state.pdf.numPages, Number(pageNumber) || 1));
   if (next === state.currentPage) return;
   stopNarration(true);
+  state.selectedFieldId = null;
+  state.fieldInteraction = null;
   state.currentPage = next;
   localStorage.setItem(`${state.answerStorageKey}:last-page`, String(next));
   updatePageUI();
@@ -337,8 +377,20 @@ function changeZoom(delta) {
 
 function renderResponseFields() {
   els.responseLayer.replaceChildren();
+  els.responseLayer.classList.toggle("editor-active", state.fieldEditor);
   const answers = currentPageAnswers();
   for (const field of pageDefinition().fields || []) {
+    const shell = document.createElement("div");
+    shell.className = `response-field-shell ${field.type}`;
+    shell.dataset.fieldId = field.id;
+    shell.classList.toggle("selected", state.fieldEditor && state.selectedFieldId === field.id);
+    Object.assign(shell.style, {
+      left: `${field.x}%`,
+      top: `${field.y}%`,
+      width: `${field.width}%`,
+      height: `${field.height}%`,
+    });
+
     const control = document.createElement(field.type === "single-line" ? "input" : "textarea");
     if (control instanceof HTMLInputElement) control.type = "text";
     control.className = `response-field ${field.type}`;
@@ -348,18 +400,271 @@ function renderResponseFields() {
     control.dataset.fieldId = field.id;
     if (field.maxLength) control.maxLength = field.maxLength;
     control.spellcheck = true;
-    Object.assign(control.style, {
-      left: `${field.x}%`,
-      top: `${field.y}%`,
-      width: `${field.width}%`,
-      height: `${field.height}%`,
-      fontSize: `${Math.max(12, els.pageWrap.clientWidth * (field.fontScale || 0.014))}px`,
-    });
+    control.readOnly = state.fieldEditor;
+    control.tabIndex = state.fieldEditor ? -1 : 0;
+    control.style.fontSize = `${Math.max(12, els.pageWrap.clientWidth * (field.fontScale || 0.014))}px`;
     control.addEventListener("input", () => {
       answers[field.id] = control.value;
       persistAnswers();
     });
-    els.responseLayer.append(control);
+    shell.append(control);
+
+    if (state.fieldEditor) {
+      const typeLabel = document.createElement("span");
+      typeLabel.className = "field-type-label";
+      typeLabel.textContent = field.type === "single-line" ? "1行" : "複数行";
+      shell.append(typeLabel);
+
+      const resizeHandle = document.createElement("button");
+      resizeHandle.type = "button";
+      resizeHandle.className = "field-resize-handle";
+      resizeHandle.setAttribute("aria-label", "入力欄のサイズを変更");
+      resizeHandle.textContent = "↘";
+      resizeHandle.addEventListener("pointerdown", (event) => beginFieldInteraction(event, field, "resize"));
+      shell.append(resizeHandle);
+      shell.addEventListener("pointerdown", (event) => {
+        if (event.target !== resizeHandle) beginFieldInteraction(event, field, "move");
+      });
+    }
+
+    els.responseLayer.append(shell);
+  }
+
+  if (state.fieldInteraction?.kind === "create") {
+    const rect = normalizedFieldRect(state.fieldInteraction.start, state.fieldInteraction.current);
+    const preview = document.createElement("div");
+    preview.className = `field-create-preview ${state.fieldType}`;
+    Object.assign(preview.style, {
+      left: `${rect.x}%`,
+      top: `${rect.y}%`,
+      width: `${rect.width}%`,
+      height: `${rect.height}%`,
+    });
+    els.responseLayer.append(preview);
+  }
+  updateFieldEditorUI();
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function roundPercent(value) {
+  return Math.round(value * 100) / 100;
+}
+
+function pointerPercent(event) {
+  const rect = els.responseLayer.getBoundingClientRect();
+  return {
+    x: clamp(((event.clientX - rect.left) / rect.width) * 100, 0, 100),
+    y: clamp(((event.clientY - rect.top) / rect.height) * 100, 0, 100),
+  };
+}
+
+function normalizedFieldRect(start, end) {
+  return {
+    x: Math.min(start.x, end.x),
+    y: Math.min(start.y, end.y),
+    width: Math.abs(end.x - start.x),
+    height: Math.abs(end.y - start.y),
+  };
+}
+
+function fieldById(id) {
+  return (pageDefinition().fields || []).find((field) => field.id === id);
+}
+
+function nextFieldId() {
+  const prefix = `page-${String(state.currentPage).padStart(3, "0")}-field-`;
+  const used = new Set((pageDefinition().fields || []).map((field) => field.id));
+  let number = 1;
+  while (used.has(`${prefix}${String(number).padStart(2, "0")}`)) number += 1;
+  return `${prefix}${String(number).padStart(2, "0")}`;
+}
+
+function setFieldEditor(enabled) {
+  if (!state.manifest) return;
+  state.fieldEditor = enabled;
+  state.selectedFieldId = null;
+  state.fieldInteraction = null;
+  stopNarration(true);
+  els.fieldEditorPanel.hidden = !enabled;
+  els.fieldEditorBtn.setAttribute("aria-pressed", String(enabled));
+  els.fieldEditorBtn.textContent = enabled ? "✓ 配置を終了" : "▣ 入力欄を配置";
+  renderResponseFields();
+  if (enabled) notify("PDF上をドラッグすると、入力欄を作れます。", "info");
+}
+
+function setFieldType(type) {
+  state.fieldType = type;
+  const selected = fieldById(state.selectedFieldId);
+  if (selected) {
+    selected.type = type;
+    if (type === "multiline" && selected.height < 4) selected.height = Math.min(4, 100 - selected.y);
+    if (type === "single-line") {
+      const answers = currentPageAnswers();
+      if (typeof answers[selected.id] === "string") answers[selected.id] = answers[selected.id].replace(/[\r\n]+/g, " ");
+      persistAnswers();
+    }
+    state.layoutDirty = true;
+    renderResponseFields();
+    return;
+  }
+  updateFieldEditorUI();
+}
+
+function updateFieldEditorUI() {
+  const fields = state.manifest ? (pageDefinition().fields || []) : [];
+  const selected = fieldById(state.selectedFieldId);
+  if (state.selectedFieldId && !selected) state.selectedFieldId = null;
+  els.singleLineFieldBtn.classList.toggle("active", state.fieldType === "single-line");
+  els.multilineFieldBtn.classList.toggle("active", state.fieldType === "multiline");
+  els.singleLineFieldBtn.setAttribute("aria-pressed", String(state.fieldType === "single-line"));
+  els.multilineFieldBtn.setAttribute("aria-pressed", String(state.fieldType === "multiline"));
+  els.deleteFieldBtn.disabled = !selected;
+  els.clearPageFieldsBtn.disabled = fields.length === 0;
+  if (!state.fieldEditor) return;
+  els.fieldEditorStatus.textContent = selected
+    ? `選択中: ${selected.type === "single-line" ? "1行・改行なし" : "複数行・改行あり"}。ドラッグで移動、右下でサイズ変更。`
+    : `ページ${state.currentPage}: ${fields.length}個。種類を選び、PDF上をドラッグしてください。`;
+}
+
+function beginFieldInteraction(event, field, kind) {
+  if (!state.fieldEditor || event.button !== 0) return;
+  event.preventDefault();
+  event.stopPropagation();
+  state.selectedFieldId = field.id;
+  state.fieldType = field.type;
+  state.fieldInteraction = {
+    kind,
+    pointerId: event.pointerId,
+    start: pointerPercent(event),
+    current: pointerPercent(event),
+    original: { x: field.x, y: field.y, width: field.width, height: field.height },
+    changed: false,
+  };
+  els.responseLayer.setPointerCapture?.(event.pointerId);
+  renderResponseFields();
+}
+
+function beginFieldCreation(event) {
+  if (!state.fieldEditor || event.button !== 0 || event.target !== els.responseLayer) return;
+  event.preventDefault();
+  const point = pointerPercent(event);
+  state.selectedFieldId = null;
+  state.fieldInteraction = { kind: "create", pointerId: event.pointerId, start: point, current: point, changed: false };
+  els.responseLayer.setPointerCapture?.(event.pointerId);
+  renderResponseFields();
+}
+
+function moveFieldInteraction(event) {
+  const interaction = state.fieldInteraction;
+  if (!interaction || event.pointerId !== interaction.pointerId) return;
+  event.preventDefault();
+  const current = pointerPercent(event);
+  interaction.current = current;
+  if (interaction.kind === "create") {
+    interaction.changed = true;
+    renderResponseFields();
+    return;
+  }
+
+  const field = fieldById(state.selectedFieldId);
+  if (!field) return;
+  const dx = current.x - interaction.start.x;
+  const dy = current.y - interaction.start.y;
+  if (interaction.kind === "move") {
+    field.x = roundPercent(clamp(interaction.original.x + dx, 0, 100 - field.width));
+    field.y = roundPercent(clamp(interaction.original.y + dy, 0, 100 - field.height));
+  } else {
+    const minHeight = field.type === "single-line" ? 2.5 : 4;
+    field.width = roundPercent(clamp(interaction.original.width + dx, 3, 100 - field.x));
+    field.height = roundPercent(clamp(interaction.original.height + dy, minHeight, 100 - field.y));
+  }
+  interaction.changed = Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05;
+  renderResponseFields();
+}
+
+function endFieldInteraction(event) {
+  const interaction = state.fieldInteraction;
+  if (!interaction || event.pointerId !== interaction.pointerId) return;
+  if (interaction.kind === "create") {
+    const rect = normalizedFieldRect(interaction.start, pointerPercent(event));
+    if (rect.width >= 2 && rect.height >= 1.5) {
+      const minHeight = state.fieldType === "single-line" ? 2.5 : 4;
+      const width = Math.min(100, Math.max(3, rect.width));
+      const height = Math.min(100, Math.max(minHeight, rect.height));
+      const page = editablePageDefinition();
+      const field = {
+        id: nextFieldId(),
+        type: state.fieldType,
+        label: `ページ${state.currentPage}の回答欄${page.fields.length + 1}`,
+        x: roundPercent(Math.min(rect.x, 100 - width)),
+        y: roundPercent(Math.min(rect.y, 100 - height)),
+        width: roundPercent(width),
+        height: roundPercent(height),
+      };
+      page.fields.push(field);
+      state.selectedFieldId = field.id;
+      state.layoutDirty = true;
+    } else {
+      notify("入力欄が小さすぎます。もう少し大きくドラッグしてください。", "warning");
+    }
+  } else if (interaction.changed) {
+    state.layoutDirty = true;
+  }
+  if (els.responseLayer.hasPointerCapture?.(event.pointerId)) els.responseLayer.releasePointerCapture(event.pointerId);
+  state.fieldInteraction = null;
+  renderResponseFields();
+}
+
+function deleteSelectedField() {
+  const page = editablePageDefinition();
+  const index = page.fields.findIndex((field) => field.id === state.selectedFieldId);
+  if (index < 0) return;
+  const [removed] = page.fields.splice(index, 1);
+  delete currentPageAnswers()[removed.id];
+  persistAnswers();
+  state.selectedFieldId = null;
+  state.layoutDirty = true;
+  renderResponseFields();
+}
+
+function clearCurrentPageFields() {
+  const page = editablePageDefinition();
+  if (!page.fields.length) return;
+  if (!window.confirm(`ページ${state.currentPage}の入力欄をすべて削除しますか？`)) return;
+  const answers = currentPageAnswers();
+  for (const field of page.fields) delete answers[field.id];
+  page.fields = [];
+  persistAnswers();
+  state.selectedFieldId = null;
+  state.layoutDirty = true;
+  renderResponseFields();
+}
+
+async function exportEditedPackage() {
+  if (!state.zip || !state.manifest) return;
+  try {
+    validateManifest(state.manifest);
+    els.exportPackageBtn.disabled = true;
+    els.exportPackageBtn.textContent = "ZIP作成中…";
+    state.zip.file(`${state.zipPrefix}script.json`, `${JSON.stringify(state.manifest, null, 2)}\n`);
+    const blob = await state.zip.generateAsync({
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: { level: 6 },
+    });
+    const originalBase = state.originalZipName.replace(/\.zip$/i, "") || safeFilename(state.manifest.title);
+    downloadBlob(blob, `${safeFilename(originalBase)}-fields.zip`);
+    state.layoutDirty = false;
+    notify("入力欄を含むZIPを保存しました。", "info");
+  } catch (error) {
+    console.error(error);
+    notify("ZIPを作成できませんでした。", "error");
+  } finally {
+    els.exportPackageBtn.disabled = false;
+    els.exportPackageBtn.textContent = "⇩ ZIPを保存";
   }
 }
 
@@ -560,6 +865,7 @@ function bindEvents() {
   }
   els.dropZone.addEventListener("drop", (event) => loadPackage(event.dataTransfer?.files?.[0]));
   els.changeZipBtn.addEventListener("click", () => {
+    if (state.layoutDirty && !window.confirm("ZIPへ保存していない入力欄の変更があります。別のZIPを開きますか？")) return;
     unloadCurrentPackage();
     els.player.hidden = true;
     els.dropScreen.hidden = false;
@@ -574,6 +880,12 @@ function bindEvents() {
   els.fitWidthBtn.addEventListener("click", () => setFitMode("width"));
   els.zoomOutBtn.addEventListener("click", () => changeZoom(-0.1));
   els.zoomInBtn.addEventListener("click", () => changeZoom(0.1));
+  els.fieldEditorBtn.addEventListener("click", () => setFieldEditor(!state.fieldEditor));
+  els.singleLineFieldBtn.addEventListener("click", () => setFieldType("single-line"));
+  els.multilineFieldBtn.addEventListener("click", () => setFieldType("multiline"));
+  els.deleteFieldBtn.addEventListener("click", deleteSelectedField);
+  els.clearPageFieldsBtn.addEventListener("click", clearCurrentPageFields);
+  els.exportPackageBtn.addEventListener("click", exportEditedPackage);
   els.exportAnswersBtn.addEventListener("click", exportAnswers);
   els.fullscreenBtn.addEventListener("click", async () => {
     if (document.fullscreenElement) await document.exitFullscreen();
@@ -582,11 +894,40 @@ function bindEvents() {
   els.playPauseBtn.addEventListener("click", togglePlayback);
   els.stopBtn.addEventListener("click", () => stopNarration(true));
   els.continueBtn.addEventListener("click", continueAfterWait);
+  els.responseLayer.addEventListener("pointerdown", beginFieldCreation);
+  els.responseLayer.addEventListener("pointermove", moveFieldInteraction);
+  els.responseLayer.addEventListener("pointerup", endFieldInteraction);
+  els.responseLayer.addEventListener("pointercancel", () => {
+    state.fieldInteraction = null;
+    renderResponseFields();
+  });
   window.addEventListener("resize", debounce(() => renderCurrentPage(), 180));
-  window.addEventListener("beforeunload", () => { stopNarration(false); persistAnswers(); });
+  window.addEventListener("beforeunload", (event) => {
+    stopNarration(false);
+    persistAnswers();
+    if (state.layoutDirty) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
   document.addEventListener("keydown", (event) => {
     const tag = event.target?.tagName?.toLowerCase();
     if (["input", "textarea", "button"].includes(tag)) return;
+    if (state.fieldEditor) {
+      if ((event.key === "Delete" || event.key === "Backspace") && state.selectedFieldId) {
+        event.preventDefault();
+        deleteSelectedField();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        if (state.selectedFieldId) {
+          state.selectedFieldId = null;
+          renderResponseFields();
+        } else {
+          setFieldEditor(false);
+        }
+      }
+      return;
+    }
     if (event.code === "Space") { event.preventDefault(); togglePlayback(); }
     if (event.key === "ArrowLeft") goToPage(state.currentPage - 1);
     if (event.key === "ArrowRight") goToPage(state.currentPage + 1);
