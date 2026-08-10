@@ -46,6 +46,7 @@
             <span id="totalPagesTop">1</span>
           </div>
           <div class="top-actions">
+            <button id="compositionBtn" class="tool-btn composition-btn" type="button" aria-pressed="false" hidden>✍ 作文を書く</button>
             <button id="fieldEditorBtn" class="tool-btn" type="button" aria-pressed="false">▣ 入力欄を配置</button>
             <button id="exportPackageBtn" class="tool-btn" type="button">⇩ ZIPを保存</button>
             <button id="exportAnswersBtn" class="tool-btn" type="button">回答を保存</button>
@@ -67,6 +68,32 @@
             <button id="clearPageFieldsBtn" type="button" disabled>このページの欄を全削除</button>
           </div>
           <p id="fieldEditorStatus">欄の種類を選び、PDF上をドラッグしてください。</p>
+        </section>
+
+        <section id="compositionPanel" class="composition-panel" aria-labelledby="compositionHeading" hidden>
+          <header class="composition-header">
+            <div>
+              <p class="eyebrow">STORY WRITING</p>
+              <h2 id="compositionHeading">物語本文を書く</h2>
+            </div>
+            <div class="composition-actions">
+              <button id="saveCompositionTextBtn" type="button">TXTで保存</button>
+              <button id="closeCompositionBtn" type="button">PDFへ戻る</button>
+            </div>
+          </header>
+          <div class="composition-paper">
+            <p id="compositionPrompt" class="composition-prompt"></p>
+            <label class="composition-title-label">
+              作品タイトル
+              <input id="compositionTitleInput" type="text" maxlength="120" placeholder="作品タイトルを入力" />
+            </label>
+            <label class="composition-body-label" for="compositionTextInput">物語本文</label>
+            <textarea id="compositionTextInput" placeholder="ここに物語を書きます。改行も使えます。" spellcheck="true"></textarea>
+            <footer class="composition-footer">
+              <span>入力内容はブラウザへ自動保存されます</span>
+              <strong id="compositionCharacterCount">0文字</strong>
+            </footer>
+          </div>
         </section>
 
         <section class="workspace">
