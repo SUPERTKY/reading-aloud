@@ -26,6 +26,7 @@
                   "properties": {
                     "type": {"const": "speak"},
                     "text": {"type": "string", "minLength": 1},
+                    "reading": {"type": "string", "minLength": 1},
                     "audio": {"type": "string"},
                     "caption": {"type": "string"},
                     "lang": {"type": "string"},
@@ -45,6 +46,26 @@
                 }
               ]
             }
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "type", "x", "y", "width", "height"],
+              "properties": {
+                "id": {"type": "string", "minLength": 1},
+                "type": {"enum": ["single-line", "multiline"]},
+                "label": {"type": "string"},
+                "placeholder": {"type": "string"},
+                "x": {"type": "number", "minimum": 0, "maximum": 100},
+                "y": {"type": "number", "minimum": 0, "maximum": 100},
+                "width": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+                "height": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+                "maxLength": {"type": "integer", "minimum": 1},
+                "fontScale": {"type": "number", "exclusiveMinimum": 0}
+              },
+              "additionalProperties": false
+            }
           }
         },
         "additionalProperties": false
@@ -53,4 +74,3 @@
   },
   "additionalProperties": false
 }
-

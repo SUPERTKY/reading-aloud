@@ -121,7 +121,7 @@ def build(args: argparse.Namespace) -> None:
                 current += 1
                 print(f"[{current}/{speak_count}] page {page['page']} cue {cue_number}", flush=True)
                 query = request_json(
-                    engine_url(args.engine, "/audio_query", text=cue["text"], speaker=args.speaker),
+                    engine_url(args.engine, "/audio_query", text=cue.get("reading") or cue["text"], speaker=args.speaker),
                     method="POST",
                 )
                 query["speedScale"] = args.speed_scale

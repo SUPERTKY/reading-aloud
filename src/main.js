@@ -25,7 +25,7 @@ const els = {
   pdfStage: $("pdfStage"),
   pageWrap: $("pageWrap"),
   pdfCanvas: $("pdfCanvas"),
-  annotationLayer: $("annotationLayer"),
+  responseLayer: $("responseLayer"),
   renderSpinner: $("renderSpinner"),
   prevPageBtn: $("prevPageBtn"),
   nextPageBtn: $("nextPageBtn"),
@@ -36,7 +36,6 @@ const els = {
   zoomOutBtn: $("zoomOutBtn"),
   zoomInBtn: $("zoomInBtn"),
   zoomLabel: $("zoomLabel"),
-  writeModeBtn: $("writeModeBtn"),
   exportAnswersBtn: $("exportAnswersBtn"),
   fullscreenBtn: $("fullscreenBtn"),
   playPauseBtn: $("playPauseBtn"),
@@ -57,10 +56,8 @@ const state = {
   zoom: 1,
   renderTask: null,
   renderSerial: 0,
-  writeMode: false,
   answers: { pages: {} },
   answerStorageKey: "",
-  resizeObservers: [],
   audioUrls: new Map(),
   activeAudio: null,
   activeAudioResolve: null,
@@ -105,7 +102,7 @@ function zipEntry(path) {
 }
 
 function pageDefinition(pageNumber = state.currentPage) {
-  return state.manifest?.pages?.find((page) => Number(page.page) === pageNumber) ?? { page: pageNumber, cues: [] };
+  return state.manifest?.pages?.find((page) => Number(page.page) === pageNumber) ?? { page: pageNumber, cues: [], fields: [] };
 }
 
 function validateManifest(manifest) {
@@ -123,7 +120,32 @@ function validateManifest(manifest) {
     for (const cue of page.cues) {
       if (!['speak', 'wait'].includes(cue.type)) throw new Error(`page ${page.page} に不明な cue type があります。`);
       if (cue.type === "speak" && !cue.text && !cue.audio) throw new Error(`page ${page.page} の speak には text または audio が必要です。`);
+      if (cue.reading !== undefined && (typeof cue.reading !== "string" || !cue.reading.trim())) {
+        throw new Error(`page ${page.page} の reading は空でない文字列にしてください。`);
+      }
       if (cue.audio) normalizePath(cue.audio);
+    }
+    if (page.fields !== undefined && !Array.isArray(page.fields)) {
+      throw new Error(`page ${page.page} の fields は配列にしてください。`);
+    }
+    const fieldIds = new Set();
+    for (const field of page.fields || []) {
+      if (!field.id || typeof field.id !== "string") throw new Error(`page ${page.page} の入力欄に id が必要です。`);
+      if (fieldIds.has(field.id)) throw new Error(`page ${page.page} の field id「${field.id}」が重複しています。`);
+      fieldIds.add(field.id);
+      if (!["single-line", "multiline"].includes(field.type)) throw new Error(`page ${page.page} の field type が不正です。`);
+      for (const key of ["x", "y", "width", "height"]) {
+        if (!Number.isFinite(field[key])) throw new Error(`page ${page.page} の field「${field.id}」に ${key} が必要です。`);
+      }
+      if (field.x < 0 || field.y < 0 || field.width <= 0 || field.height <= 0 || field.x + field.width > 100 || field.y + field.height > 100) {
+        throw new Error(`page ${page.page} の field「${field.id}」がページ範囲外です。`);
+      }
+      if (field.maxLength !== undefined && (!Number.isInteger(field.maxLength) || field.maxLength < 1)) {
+        throw new Error(`page ${page.page} の field「${field.id}」の maxLength が不正です。`);
+      }
+      if (field.fontScale !== undefined && (!Number.isFinite(field.fontScale) || field.fontScale <= 0)) {
+        throw new Error(`page ${page.page} の field「${field.id}」の fontScale が不正です。`);
+      }
     }
   }
 }
@@ -207,7 +229,7 @@ function loadAnswers() {
   } catch (error) {
     console.warn("Saved answers could not be read", error);
   }
-  return { version: 1, workbookId: state.manifest.id || state.manifest.title, title: state.manifest.title, pages: {} };
+  return { version: 2, workbookId: state.manifest.id || state.manifest.title, title: state.manifest.title, pages: {} };
 }
 
 function persistAnswers() {
@@ -218,9 +240,9 @@ function persistAnswers() {
   }
 }
 
-function currentNotes() {
+function currentPageAnswers() {
   const key = String(state.currentPage);
-  state.answers.pages[key] ||= [];
+  if (!state.answers.pages[key] || Array.isArray(state.answers.pages[key])) state.answers.pages[key] = {};
   return state.answers.pages[key];
 }
 
@@ -248,12 +270,12 @@ async function renderCurrentPage() {
     canvas.style.height = `${viewport.height}px`;
     els.pageWrap.style.width = `${viewport.width}px`;
     els.pageWrap.style.height = `${viewport.height}px`;
-    els.annotationLayer.style.width = `${viewport.width}px`;
-    els.annotationLayer.style.height = `${viewport.height}px`;
+    els.responseLayer.style.width = `${viewport.width}px`;
+    els.responseLayer.style.height = `${viewport.height}px`;
     state.renderTask = page.render({ canvasContext: context, viewport, transform: dpr === 1 ? null : [dpr, 0, 0, dpr, 0, 0] });
     await state.renderTask.promise;
     if (serial !== state.renderSerial) return;
-    renderAnnotations();
+    renderResponseFields();
   } catch (error) {
     if (error?.name !== "RenderingCancelledException") {
       console.error(error);
@@ -313,101 +335,32 @@ function changeZoom(delta) {
   renderCurrentPage();
 }
 
-function setWriteMode(enabled) {
-  state.writeMode = enabled;
-  els.writeModeBtn.setAttribute("aria-pressed", String(enabled));
-  els.writeModeBtn.textContent = enabled ? "✓ 書き込み中" : "✎ 書き込む";
-  els.annotationLayer.classList.toggle("write-mode", enabled);
-  if (enabled) notify("PDFの書きたい場所をクリックすると入力欄を置けます。", "info");
-}
-
-function renderAnnotations() {
-  for (const observer of state.resizeObservers) observer.disconnect();
-  state.resizeObservers = [];
-  els.annotationLayer.replaceChildren();
-  for (const note of currentNotes()) mountNote(note);
-  els.annotationLayer.classList.toggle("write-mode", state.writeMode);
-}
-
-function createNoteAt(clientX, clientY) {
-  const rect = els.annotationLayer.getBoundingClientRect();
-  const x = Math.max(0, Math.min(82, ((clientX - rect.left) / rect.width) * 100));
-  const y = Math.max(0, Math.min(90, ((clientY - rect.top) / rect.height) * 100));
-  const note = {
-    id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`,
-    x, y, w: 34, h: 9, text: "",
-  };
-  currentNotes().push(note);
-  persistAnswers();
-  const textarea = mountNote(note);
-  textarea.focus();
-}
-
-function mountNote(note) {
-  const shell = document.createElement("div");
-  shell.className = "note-shell";
-  shell.dataset.noteId = note.id;
-  Object.assign(shell.style, {
-    left: `${note.x}%`, top: `${note.y}%`, width: `${note.w}%`, height: `${note.h}%`,
-  });
-
-  const toolbar = document.createElement("div");
-  toolbar.className = "note-toolbar";
-  const handle = document.createElement("span");
-  handle.className = "drag-handle";
-  handle.textContent = "移動";
-  const remove = document.createElement("button");
-  remove.type = "button";
-  remove.className = "delete-note";
-  remove.textContent = "×";
-  remove.setAttribute("aria-label", "この入力欄を削除");
-  toolbar.append(handle, remove);
-
-  const textarea = document.createElement("textarea");
-  textarea.className = "note-text";
-  textarea.value = note.text || "";
-  textarea.placeholder = "回答を入力";
-  textarea.setAttribute("aria-label", `ページ${state.currentPage}の回答`);
-  shell.append(toolbar, textarea);
-  els.annotationLayer.append(shell);
-
-  textarea.addEventListener("input", () => { note.text = textarea.value; persistAnswers(); });
-  remove.addEventListener("click", () => {
-    const notes = currentNotes();
-    const index = notes.findIndex((item) => item.id === note.id);
-    if (index >= 0) notes.splice(index, 1);
-    persistAnswers();
-    shell.remove();
-  });
-
-  let drag = null;
-  handle.addEventListener("pointerdown", (event) => {
-    event.preventDefault();
-    handle.setPointerCapture(event.pointerId);
-    const rect = els.annotationLayer.getBoundingClientRect();
-    drag = { startX: event.clientX, startY: event.clientY, x: note.x, y: note.y, rect };
-  });
-  handle.addEventListener("pointermove", (event) => {
-    if (!drag) return;
-    note.x = Math.max(0, Math.min(100 - note.w, drag.x + ((event.clientX - drag.startX) / drag.rect.width) * 100));
-    note.y = Math.max(0, Math.min(100 - note.h, drag.y + ((event.clientY - drag.startY) / drag.rect.height) * 100));
-    shell.style.left = `${note.x}%`;
-    shell.style.top = `${note.y}%`;
-  });
-  handle.addEventListener("pointerup", () => { drag = null; persistAnswers(); });
-  handle.addEventListener("pointercancel", () => { drag = null; persistAnswers(); });
-
-  const observer = new ResizeObserver(() => {
-    const layerRect = els.annotationLayer.getBoundingClientRect();
-    const shellRect = shell.getBoundingClientRect();
-    if (!layerRect.width || !layerRect.height) return;
-    note.w = Math.min(100 - note.x, (shellRect.width / layerRect.width) * 100);
-    note.h = Math.min(100 - note.y, (shellRect.height / layerRect.height) * 100);
-    persistAnswers();
-  });
-  observer.observe(shell);
-  state.resizeObservers.push(observer);
-  return textarea;
+function renderResponseFields() {
+  els.responseLayer.replaceChildren();
+  const answers = currentPageAnswers();
+  for (const field of pageDefinition().fields || []) {
+    const control = document.createElement(field.type === "single-line" ? "input" : "textarea");
+    if (control instanceof HTMLInputElement) control.type = "text";
+    control.className = `response-field ${field.type}`;
+    control.value = answers[field.id] || "";
+    control.placeholder = field.placeholder || "ここに入力";
+    control.setAttribute("aria-label", field.label || `ページ${state.currentPage}の回答`);
+    control.dataset.fieldId = field.id;
+    if (field.maxLength) control.maxLength = field.maxLength;
+    control.spellcheck = true;
+    Object.assign(control.style, {
+      left: `${field.x}%`,
+      top: `${field.y}%`,
+      width: `${field.width}%`,
+      height: `${field.height}%`,
+      fontSize: `${Math.max(12, els.pageWrap.clientWidth * (field.fontScale || 0.014))}px`,
+    });
+    control.addEventListener("input", () => {
+      answers[field.id] = control.value;
+      persistAnswers();
+    });
+    els.responseLayer.append(control);
+  }
 }
 
 function exportAnswers() {
@@ -559,7 +512,7 @@ async function playSpeakCue(cue, token) {
     }
   }
   if (!cue.text) throw new Error("読み上げるテキストがありません。");
-  await speakInBrowser(cue.text, cue, token);
+  await speakInBrowser(cue.reading || cue.text, cue, token);
 }
 
 function playAudioUrl(url, token) {
@@ -621,10 +574,6 @@ function bindEvents() {
   els.fitWidthBtn.addEventListener("click", () => setFitMode("width"));
   els.zoomOutBtn.addEventListener("click", () => changeZoom(-0.1));
   els.zoomInBtn.addEventListener("click", () => changeZoom(0.1));
-  els.writeModeBtn.addEventListener("click", () => setWriteMode(!state.writeMode));
-  els.annotationLayer.addEventListener("click", (event) => {
-    if (state.writeMode && event.target === els.annotationLayer) createNoteAt(event.clientX, event.clientY);
-  });
   els.exportAnswersBtn.addEventListener("click", exportAnswers);
   els.fullscreenBtn.addEventListener("click", async () => {
     if (document.fullscreenElement) await document.exitFullscreen();
