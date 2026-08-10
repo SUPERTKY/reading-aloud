@@ -53,7 +53,7 @@ const state = {
   manifest: null,
   pdf: null,
   currentPage: 1,
-  fitMode: "page",
+  fitMode: "width",
   zoom: 1,
   renderTask: null,
   renderSerial: 0,
@@ -170,6 +170,7 @@ async function loadPackage(file) {
     els.player.hidden = false;
     updatePageUI();
     await renderCurrentPage();
+    els.pdfStage.scrollTo({ top: 0, left: 0 });
 
     const hasAudio = manifest.pages.some((p) => p.cues.some((cue) => cue.audio));
     if (hasAudio && !manifest.voiceCredit) {
@@ -278,6 +279,9 @@ function updatePageUI() {
   els.zoomLabel.textContent = `${Math.round(state.zoom * 100)}%`;
   els.fitPageBtn.classList.toggle("active", state.fitMode === "page");
   els.fitWidthBtn.classList.toggle("active", state.fitMode === "width");
+  els.fitPageBtn.setAttribute("aria-pressed", String(state.fitMode === "page"));
+  els.fitWidthBtn.setAttribute("aria-pressed", String(state.fitMode === "width"));
+  els.pdfStage.classList.toggle("fit-width", state.fitMode === "width");
   const cues = pageDefinition().cues;
   els.narrationCaption.textContent = cues.length ? `このページには ${cues.length} 個の読み上げ・待機指示があります。` : "このページには読み上げ指示がありません。";
   updatePlaybackUI();
@@ -292,13 +296,15 @@ async function goToPage(pageNumber) {
   localStorage.setItem(`${state.answerStorageKey}:last-page`, String(next));
   updatePageUI();
   await renderCurrentPage();
+  els.pdfStage.scrollTo({ top: 0, left: 0 });
 }
 
-function setFitMode(mode) {
+async function setFitMode(mode) {
   state.fitMode = mode;
   state.zoom = 1;
   updatePageUI();
-  renderCurrentPage();
+  await renderCurrentPage();
+  els.pdfStage.scrollTo({ top: 0, left: 0 });
 }
 
 function changeZoom(delta) {
