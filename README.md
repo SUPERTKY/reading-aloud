@@ -9,7 +9,7 @@ PDFワークを1ページずつ大きく表示し、音声の再生・一時停�
 - ページ番号を常時表示し、矢印・ページ番号入力・キーボードで手動移動
 - 読み上げ、一時停止、再開、停止
 - `wait` の位置で時間制限なく待機し、「書き終わったら続ける」で再開
-- PDF上をクリックして回答欄を置き、入力・移動・大きさ変更・削除
+- 台本で指定されたPDF上の回答欄へ直接入力
 - 回答をブラウザに自動保存し、JSONとして書き出し
 - VOICEVOXの生成済みWAVを優先し、WAVがなければブラウザ音声で試聴
 
@@ -40,6 +40,18 @@ workbook.zip
         {"type": "speak", "text": "最初の説明です。", "audio": "audio/page-001-cue-001.wav"},
         {"type": "wait", "label": "ここを書いてください。"},
         {"type": "speak", "text": "続きの説明です。", "audio": "audio/page-001-cue-003.wav"}
+      ],
+      "fields": [
+        {
+          "id": "page-01-answer",
+          "type": "single-line",
+          "label": "一行の回答",
+          "x": 10,
+          "y": 70,
+          "width": 80,
+          "height": 4,
+          "maxLength": 60
+        }
       ]
     }
   ]
@@ -47,6 +59,26 @@ workbook.zip
 ```
 
 完全な例は `examples/horror-workbook-script.json`、JSON Schemaは `examples/script.schema.json` にあります。
+
+## 回答欄をスクリプトで配置する
+
+各ページの `fields` に、PDFページ全体を100とした割合で位置と大きさを指定します。利用者は指定欄だけに入力でき、自由な位置へ欄を追加・移動・削除する機能はありません。
+
+| 項目 | 内容 |
+|---|---|
+| `id` | ページ内で重複しない回答欄ID |
+| `type` | `single-line` は改行不可、`multiline` は改行可 |
+| `x`, `y` | 左上の位置（0〜100%） |
+| `width`, `height` | 欄の大きさ（0〜100%） |
+| `label` | 読み上げ支援用の欄名 |
+| `placeholder` | 未入力時に表示する案内 |
+| `maxLength` | 任意の最大文字数 |
+
+読み方だけを直す場合は、表示文を `text` に残し、音声合成へ送る文を `reading` に書けます。
+
+```json
+{"type": "speak", "text": "怪異は全部見せない", "reading": "かいいは、ぜんぶみせない"}
+```
 
 ## ページ内のVOICEVOXクレジット
 
@@ -115,7 +147,7 @@ npm run dev
 |---|---|
 | Space | 読み上げ／一時停止／再開 |
 | ← / → | 前／次ページ（音声は停止） |
-| 「書き込む」→ PDFをクリック | 回答欄を追加 |
+| PDF上の入力欄 | 台本で指定された場所へ回答を入力 |
 | 「回答を保存」 | 全ページの回答をJSONで保存 |
 
 ## VOICEVOX利用時の注意
