@@ -94,16 +94,11 @@ button:disabled { cursor: not-allowed; opacity: .35; }
 .page-arrow { align-self:stretch; border:0; color:#b7b6c7; background:rgba(0,0,0,.10); font-size:54px; transition:.15s; }
 .page-arrow:hover:not(:disabled) { color:var(--amber); background:rgba(243,185,95,.08); }
 
-.annotation-layer { position:absolute; inset:0; overflow:hidden; }
-.annotation-layer.write-mode { cursor:crosshair; background:rgba(105,201,193,.035); box-shadow:inset 0 0 0 2px rgba(105,201,193,.38); }
-.note-shell { position:absolute; min-width:90px; min-height:42px; resize:both; overflow:hidden; border:1px solid rgba(117,100,223,.72); border-radius:6px; background:rgba(255,255,255,.88); box-shadow:0 3px 10px rgba(22,23,40,.16); }
-.note-shell:focus-within { border-color:var(--amber); box-shadow:0 0 0 2px rgba(243,185,95,.25); }
-.note-toolbar { height:18px; display:flex; justify-content:space-between; align-items:center; color:#fff; background:rgba(39,40,65,.88); font-size:11px; opacity:0; transition:.15s; }
-.note-shell:hover .note-toolbar, .note-shell:focus-within .note-toolbar { opacity:1; }
-.drag-handle { flex:1; padding-left:6px; cursor:move; user-select:none; }
-.delete-note { width:22px; height:18px; padding:0; border:0; color:#fff; background:transparent; }
-.delete-note:hover { background:var(--rose); }
-.note-text { display:block; width:100%; height:calc(100% - 18px); resize:none; border:0; outline:0; padding:5px 7px; color:#202136; background:transparent; font-size:14px; line-height:1.45; }
+.response-layer { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.response-field { position:absolute; box-sizing:border-box; pointer-events:auto; min-width:0; min-height:0; margin:0; padding:.2em .45em; border:1px dashed rgba(117,100,223,.68); border-radius:5px; outline:0; color:#202136; background:rgba(255,255,255,.82); line-height:1.35; box-shadow:0 1px 4px rgba(22,23,40,.12); }
+.response-field:hover { border-color:rgba(117,100,223,.95); background:rgba(255,255,255,.92); }
+.response-field:focus { border-style:solid; border-color:#7564df; background:rgba(255,255,255,.97); box-shadow:0 0 0 2px rgba(117,100,223,.2); }
+.response-field.multiline { resize:none; }
 
 .control-deck { z-index:20; background:#17182d; border-top:1px solid #34364f; padding:9px 18px 7px; display:grid; grid-template-rows:38px 54px 18px; gap:6px; }
 .page-controls, .audio-controls { display:flex; align-items:center; gap:8px; }
