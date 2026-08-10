@@ -87,6 +87,7 @@ button:disabled { cursor: not-allowed; opacity: .35; }
 
 .workspace { position:relative; min-height:0; display:grid; grid-template-columns:56px minmax(0,1fr) 56px; background: radial-gradient(circle at 50% 40%, #2b2d48 0, #151627 62%, #0c0d18 100%); }
 .pdf-stage { min-width:0; min-height:0; display:flex; align-items:center; justify-content:center; overflow:auto; padding:18px; }
+.pdf-stage.fit-width { align-items:flex-start; }
 .page-wrap { position:relative; flex:0 0 auto; box-shadow:0 16px 48px rgba(0,0,0,.5); background:white; }
 #pdfCanvas { display:block; background:white; }
 .spinner { position:absolute; inset:0; display:grid; place-content:center; color:#3e4057; background:rgba(247,243,235,.88); }
