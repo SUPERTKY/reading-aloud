@@ -66,6 +66,17 @@
               },
               "additionalProperties": false
             }
+          },
+          "composition": {
+            "type": "object",
+            "properties": {
+              "prompt": {"type": "string"},
+              "titlePlaceholder": {"type": "string"},
+              "bodyPlaceholder": {"type": "string"},
+              "filename": {"type": "string"},
+              "maxLength": {"type": "integer", "minimum": 1}
+            },
+            "additionalProperties": false
           }
         },
         "additionalProperties": false
