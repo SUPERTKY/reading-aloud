@@ -54,7 +54,7 @@
               "required": ["id", "type", "x", "y", "width", "height"],
               "properties": {
                 "id": {"type": "string", "minLength": 1},
-                "type": {"enum": ["single-line", "multiline"]},
+                "type": {"enum": ["single-line", "multiline", "circle-toggle"]},
                 "label": {"type": "string"},
                 "placeholder": {"type": "string"},
                 "x": {"type": "number", "minimum": 0, "maximum": 100},
